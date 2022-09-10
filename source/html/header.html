@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/template.css">
+    <script src="js/template.js"></script>
+  </head>
+
+<body>
+<header>
+  <div  class="bg-primary d-flex justify-content-center align-items-center row">
+    <div class="d-flex justify-content-center">
+    <h1 class="text-white p-1 m-1">デザインパターン2</h1>
+      <img src="sprite/man.png" width="50">
+    </div>
+  </div>
+  <div class="row link-font2 justify-left position-fixed">
+    <div id="tableContents" class="tablecontents col">
+      <script>
+        displayTableContents(document.getElementById('tableContents'),document.getElementById('list1'));
+      </script>
+    </div>
+  </div>
+  <div class="bg-secondary bg-opacity-25 row link-font1">
+    <div class="justify-center">
+      <button class="btn btn-primary" onclick="toggleElement('linkCollection');">
+        リンク
+      </button>
+    </div>
+    <div class="col text-center d-none" id="linkCollection">
+      <a href="index.html">ホーム</a>
+      <br><a href="1.html">第一章 導入</a>
+      <br><a href="2.html">第二章 Commandパターン</a>
+      
+    </div>
+  </div>
+</header>
+</body>
+</html>

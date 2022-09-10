@@ -1,0 +1,163 @@
+html {
+    font-size: 80.0%;
+}
+
+
+@media (min-width: 650px){
+    html{
+        font-size: 110%;
+    }
+    .letter-body{
+        margin-left: 10% !important;
+        margin-right: 10% !important;
+    }
+    .code-region{
+        max-width: 550px!important;
+    }
+}
+
+@media (min-width: 1100px){
+    html{
+        font-size: 120%;
+    }
+    .letter-body{
+        margin-left: 20% !important;
+        margin-right: 20% !important;
+    }
+    .code-region{
+        max-width: 100%!important;
+    }
+}
+
+
+.background-color{
+    background-color: #fffaf0;
+}
+
+.link-font1{
+    font-size: 1.5rem;
+}
+
+.link-font2{
+    font-size: 1.0rem;
+}
+
+.title{
+    margin-top: 5%;
+    display: flex;
+    justify-content: center;
+}
+
+.strong-letter{
+    font-weight: bold;
+    border-bottom: 2px solid #0059b3;
+}
+
+.letter-body{
+    margin-top: 5%;
+    margin-left: 3%;
+    margin-right: 3%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+.margin-letter{
+    margin-top: 2%;
+}
+
+.margin-letter2{
+    margin-top: 5%;
+}
+
+.margin-letter3{
+    margin-top: 50rem;
+}
+
+.letter{
+    margin-top: 1%;
+    margin-left: 1%;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: flex-start;
+    max-width: 100%!important;
+}
+
+.video {
+    position: relative;
+    height: 0;
+    padding: 30px 0 56.25%;
+    overflow: hidden;
+}
+
+.margin-top{
+    margin-top: 3%;
+}
+    
+.video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+img {
+    max-width: 90%;
+    height: auto;
+}
+
+.code-region{
+    list-style:decimal-leading-zero outside;
+    padding-left: 40px;
+    background-color:#000;
+    color:#FFF;
+    max-width: 350px;
+    font-size: 0.8rem;
+    
+}
+
+.justify-center{
+    display: flex;
+    justify-content: center!important;
+    align-items: center!important;
+}
+.justify-left{
+    display: flex;
+    justify-content: flex-end!important;
+}
+
+.margin-left{
+    margin-left: 10%;
+}
+
+
+.question-group{
+    padding: 0.5rem;
+    border: solid!important;
+    border-color: black!important;
+
+}
+
+.correct-answer
+{
+    background-color:#99FF99;
+}
+.error-answer
+{
+    background-color:#FF9999;
+}
+
+.fiexd-content
+{
+    position: fixed;
+}
+
+.tablecontents
+{
+    
+    display: flex;
+    justify-content: flex-end!important;
+    flex-direction:column!important;
+    flex-wrap: wrap!important;
+}

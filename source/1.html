@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>デザインパターン2 第一章</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/template.css">
+    <script src="../js/template.js"></script>
+  </head>
+
+    <body>
+      
+      <div id="box">
+      </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+      </script>
+      <script>
+        jQuery(function(){
+          $('#box').load('html/header.html') // #headerにheader.htmlを読み込む
+        });
+      </script>
+      <div class="title">
+        <h1>第一章 導入</h1>
+      </div>
+      <div class="letter-body">
+        <ul id="list1">
+          <li id="1"><h2 class="margin-letter2">1.1 良いシステムアーキテクチャ</h2></li>
+          <div class="letter">
+            <div>
+              このデザインパターン2の授業では、プログラムをどのようにまとめるのか(構造・組織化)について学んでいきます。
+              また、システムの組織・構造のことを<span class="strong-letter">システムアーキテクチャ</span>といいます。
+              <div class="margin-letter">
+                ところで、良いシステムアーキテクチャとはどういうコードでしょうか。
+                読みやすい、拡張性がある、結合性が低いetc...、皆さん様々な考えがあると思います。
+                私は、良いシステムアーキテクチャとは<span class="strong-letter">変更・修正が容易である</span>と考えています。
+              </div>
+              <div class="margin-letter">
+                変更修正が容易であるとは、どのように容易なのでしょうか。
+                <br>プログラム変更の過程を見ていきましょう。
+                <br>変更をするには、まずその周辺のコードを読んで理解をしなければなりません(この時間が最も時間を要すると思います)。
+                少し考えて解法を思いついたら、キーボード上に指を走らせてコードを修正し、テストを行います。
+                テストを行った後は後片付け(プログラム全体との整理・再構成)を行いましょう(次にコードを見る人の為です)。
+                <br>まとめると、プログラム変更は次のような過程で行われます。
+                <h5>問題発見→コードの熟読→解決策のコード化→後片付け→問題発見→etc...</h5>
+              </div>
+              <div class="margin-letter">
+                良いシステムアーキテクチャは、上記の<span class="strong-letter">コードの熟読</span>過程で本領を発揮します。
+                <br>コードを読む時間は非常に時間がかかるので、読む分量を減らすというのは非常に有効です。
+                <br>読む分量を減らすには、<span class="strong-letter-letter">プログラムの分離</span>をしましょう。
+                プログラムの分離が出来ていなければ、一方だけでなくもう一方の理解をしないといけません。
+                しかし、分離が出来ていれば、片方だけ理解できていればいいのです。
+                また、分離は「一方のプログラムを変更しても、もう一方の変更が必要ない状態」ともいえます。つまり、上記の<span class="strong-letter">後片付け</span>過程でも有効なのです。
+              </div>
+              <div class="margin-letter">
+                まとめると、良いアーキテクチャとは、<span class="strong-letter">プログラムの分離ができている(それぞれのプログラムが独立している)</span>ということになります。
+                そして、分離をすることによって、<span class="margin-letter">変更を容易</span>にすることができます。
+              </div>
+              <div class="margin-letter">
+                <h4>良いアーキテクチャとは！！</h4>
+                <h4>プログラムの分離→コードを読む時間を減らせる・プログラム変更時への全体への影響が少ない→変更が容易！！</h5>
+              </div>
+              
+            </div>
+          </div>
+          <li id="2"><h2 class="margin-letter2">1.2 分離のデメリット</h2></li>
+          <div class="letter">
+            <div>
+              プログラムの分離をすれば、コードを読む時間が減り全体への影響も少なくなる、とてもうまい話に聞こえると思います。
+              そう思えばこそ、プログラマーは抽象化・モジュール化・デザインパターンといった話に食いつくのです。
+              <div class="margin-letter">
+                しかし、プログラムの変更が全体へ影響を及ぼさないデザインにするためには、適切な箇所で抽象化をしたり、拡張部分を予測しなければなりません。
+                これらは、<span class="strong-letter">かなりの手間</span>になります。また、拡張性をサポートしても将来<span class="strong-letter">その部分が使われるとは限りません。</span>そうなると、構造化にかけた時間が無駄になってしまいます。
+              </div>
+              <div class="margin-letter">
+                また、抽象化をしすぎた結果、基本クラス・仮想関数だらけになり具体的な処理をしているプログラムに辿り着くことが困難になってしまいます。
+              　それに、抽象化の階層を深くしてしまうと、その階層を理解することに時間をかけることになります。
+              </div>
+              <div class="margin-letter">
+                このように、プログラムの分離にもデメリットは存在します。
+                確かに、プログラムを分離して拡張性をサポートすることは大切ですが、それに拘りすぎてはいけません。
+                <br><span class="strong-letter">ゲームを世に出すという、一番の目的を忘れないでください。</span>
+              </div>
+              <div class="margin-letter">
+                <h4>プログラム分離のデメリット</h4>
+                <ul>
+                  <h4><li>分離に時間がかかる</li></h4>
+                  <h4><li>拡張性をサポ―トしても使用されない可能性がある</li></h4>
+                  <h4><li>抽象化の階層が増えすぎると、その階層を理解することに時間をかけないといけない</li></h4>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <li id="3"><h2 class="margin-letter2">1.3 柔軟性と実行速度</h2></li>
+          <div class="letter">
+            <div>
+              プログラムの分離(抽象化)において、上記以外にもよく言われる批判があります。
+              それは、<span class="strong-letter">実行速度が遅くなる</span>というものです。
+              仮想関数呼び出し、ポインタ、などはある程度のコストがかかってしまいます。
+              <div class="margin-letter">
+                だからといって、プログラムに柔軟性を持たせることは悪いことではありません。
+                寧ろ、<span class="strong-letter">ゲーム開発ではプログラムに柔軟性を持たせることは重要</span>なのです。
+                <br>どんなに優れたゲームプログラマーでも、紙上だけでゲームの面白さを作り上げることはできません。
+                プログラムの変更と実験の積み重ねがゲームの面白さを作り上げるのです。
+              </div>
+              <div class="margin-letter"> 
+                プログラムに柔軟性を持たせると、実行速度は遅くなってしまいます。逆に、コードを最適化すると、実行速度が速くなりますが、柔軟性は失われてしまいます。
+              </div>
+              <div class="margin-letter">
+                ゲーム開発において、実行速度は非常に重要な要素です。
+                しかし、速いゲームを面白くするよりも、面白いゲームを速くすることのほうが簡単です。
+                ですので、ある程度ゲームのデザインが落ち着くまではプログラムに柔軟性を持たせておき、デザインが決まったら抽象化を削除するというのが無難でしょう。
+              </div>
+              <div class="magin-letter">
+                <h4>柔軟性と実行速度</h4>
+                <ul>
+                  <h4><li>抽象化を行うと、ゲーム実行時にコストがかかる</li></h4>
+                  <h4><li>ゲーム開発において、プログラムに柔軟性を持たせることは大事</li></h4>
+                  <h4><li>プロトタイプ開発ではプログラムに柔軟性を持たせて置き、ゲームのデザインが決まれば抽象化を削除しよう</li></h4>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <li id="4"><h2 class="margin-letter2">1.4 単純なコード</h2></li>
+          <div class="letter">
+            <dvi>
+              プログラムの実装においては、3つの目標があります。
+              <ul>
+                <li>コードが読みやすいように、整っている</li>
+                <li>実行速度が速い</li>
+                <li>素早く実装を行う</li>
+              </ul>
+              <div class="margin-letter">
+                これら3つの目標は、トレードオフの関係にあります。<span style="color:red">トレードオフとは、両立できない関係の事です。</span>
+                プログラムを最適化してしまうと、変更が難しくなってしまいます。逆に柔軟性を持たせると、実行速度が遅くなってしまいます。
+                これらの問題には、明確な答えは存在しません。
+              </div>
+              <div class="margin-letter">
+                私は、これらの問題を緩和するには、<span>プログラムの単純さ</span>が大事ではないかと感じています。
+                <span class="strong-letter">プログラムのデータ構造とアルゴリズムを正確に理解</span>し、<span class="strong-letter">処理を単純に進める</span>ことができれば、最終的なコード量が減少します。
+                そうすれば、プログラムの変更する時に読むコード量も減りますから、変更が容易になります。また、コード量が減ると、オーバーヘッドが少なくなり実行するコード量自体も減りますから、実行速度が速くなることが普通です。
+              </div>
+              <div class="margin-letter">
+                ただし、単純なコードの実装には書く時間も短くなる、ということではありません。
+                単純なコードの作成は、<span class="strong-letter">精製(無駄な部分を削る)</span>によって得られるのです。
+              </div>
+              <div class="margin-letter">
+                <h4>単純なコード</h4>
+                <ul>
+                  <h4><li>単純なコードはプログラム実装においての問題を緩和できる</li></h4>
+                  <h4><li>単純なコードは精製によって得られる</li></h4>
+                </ul>
+              </div>
+            </dvi>
+          </div>
+        </ul>
+      </div>
+    </body>
+
+</html>
