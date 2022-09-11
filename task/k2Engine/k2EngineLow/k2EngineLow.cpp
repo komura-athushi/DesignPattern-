@@ -94,6 +94,7 @@ namespace nsK2EngineLow {
 		for (auto& pad : m_pad) {
 			pad.Update();
 		}
+		g_keyboard.get()->Update();
 		g_soundEngine->Update();
 		GameObjectManager::GetInstance()->ExecuteUpdate();
 		// エフェクトエンジンの更新。
