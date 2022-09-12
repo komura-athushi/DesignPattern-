@@ -3,6 +3,10 @@
 #include "DirectXTK/Inc/Keyboard.h"
 
 namespace nsK2EngineLow {
+    /// <summary>
+    /// キーボード入力の判定を行うクラス。
+    /// DirectX::KeyBoardを使用しています。
+    /// </summary>
 	class Keyboard : public Noncopyable
 	{
 	public:
@@ -61,10 +65,30 @@ namespace nsK2EngineLow {
             LeftControl = 0xa2,
             RightControl = 0xa3,
         };
-        bool IsKeyPress(Keys key);
+        /// <summary>
+        /// 各キーが押されているか判定。
+        /// </summary>
+        /// <param name="key">キー。</param>
+        /// <returns>押されていればtrue。</returns>
         bool IsKeyDown(Keys key);
+        /// <summary>
+        /// 各キーが押されているか判定(一度だけ)。
+        /// </summary>
+        /// <param name="key">キー。</param>
+        /// <returns>押されていればtrue。</returns>
+        bool IsKeyTrigger(Keys key);
+        /// <summary>
+        /// 各キーが押されていないか判定。
+        /// </summary>
+        /// <param name="key">キー。</param>
+        /// <returns>押されていなければtrue。</returns>
         bool IsKeyUp(Keys key);
     private:
+        /// <summary>
+        /// キーをDirectX::Keyboard::Keysに変換。
+        /// </summary>
+        /// <param name="key">キー。</param>
+        /// <returns>DirectX::Keyboard::Keys。</returns>
         DirectX::Keyboard::Keys ConvertDirectKeys(Keys key)
         {
             return static_cast<DirectX::Keyboard::Keys>((static_cast<int>(key)));

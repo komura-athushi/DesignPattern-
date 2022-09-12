@@ -38,12 +38,12 @@ void Actor::Update()
 
 void Actor::MoveUp()
 {
-	m_position.y += 100.f;
+	m_position.y += 30.f;
 }
 
 void Actor::MoveDown()
 {
-	m_position.y -= 100.f;
+	m_position.y -= 30.f;
 }
 
 void Actor::ResetPosition()

@@ -71,7 +71,7 @@
                   <br>（C）SEGA
                 </div>
                 <div class="margin-letter">
-                  このような切り替えを可能にするために、各動作をオブジェクトにしてみましょう。
+                  このような切り替えを容易にするために、各動作をオブジェクトにしてみましょう。
                   指示(コマンド)を表す基底クラスと継承クラスを下記のように定義します。
                 </div>
                 <div class="margin-letter">
@@ -228,7 +228,7 @@
               <span class="strong-letter">上記の赤線の部分をCommandパターンを用いて実装してください。</span>
               <ul>
                 <li>CommandクラスをCommand.hに用意しています。</li>
-                <li>answerフォルダに実装例がありますので、参考にしてください。</li>
+                <li>Answerフォルダに実装例がありますので、参考にしてください。</li>
               </ul>
             </div>
           </div>
@@ -237,8 +237,173 @@
             <div>
               ここまで、Commandパターンの実装例を見てきました。
               ですが、Commandパターンの利点はこれだけではありません。
-              それは、ソフトウェアにありがちな<span class="margin-letter">「取り消し」と「再実行」機能の実装の際に、Commandパターンを使用すれば非常に楽に実装が可能</span>という点です。
+              それは、ソフトウェアにありがちな<span class="strong-letter">「取り消し」と「再実行」機能の実装の際に、Commandパターンを使用すれば非常に楽に実装が可能</span>という点です。
               寧ろ、この利点がCommandパターンで最も良く知られている使用方法になります。
+              <br>では、取り消しと再実行の実装例を見ていきましょう。まずは、Commandクラスです。
+              先ほどのCommandクラスとは、少し違うことに注意してください。
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>class Command</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;virtual ~Command() {}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//処理を実行する。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;virtual void Execute() = 0;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//処理を元に戻す。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;virtual void Undo() = 0;</li>
+                  <li>};</li>
+                  <li></li>
+                  <li><font style="color:lightgreen;font-style:italic;">//Actorを移動させる。</font></li>
+                  <li>class MoveActorCommand : public Command</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;~MoveActorCommand() override {}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;MoveActorCommand(const Vector3&amp; position, Actor* actor)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_position = position;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_actor = actor;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Actorを移動させる。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Execute() override</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//移動するまえの座標を記録する。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_beforePosition = m_actor-&gt;GetPosition();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_actor-&gt;SetPosition(m_position);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Actorを移動させる前に戻す。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Undo() override</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_actor-&gt;SetPosition(m_beforePosition);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Vector3 m_position;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Vector3 m_beforePosition;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Actor* m_actor;</li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                Commandクラスに新しく<span class="strong-letter">Undo関数</span>という関数を実装しています。この<span class="strong-letter">Undo関数を呼び出すことにより、Execute関数によって実行された処理を元に戻します。</span>
+                また、前の例ではActorとCommandクラスを切り離していましたが、この例では動作させたいActorとCommandクラスを結び付けています。
+                さらに、<span class="strong-letter">Actorを移動させる前の状態を記録するために、メンバ変数m_beforePosition</span>を定義しています。
+                このCommandクラスは、色々な状況で使用できる汎用的なクラスではありません。このCommandクラスは、ある特定の時点に実行する処理を表しています。
+                <br>Actorクラスの実装を見ていきましょう。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>void Actor::Update()</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;auto newCommand = HandleInput();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;if (newCommand != nullptr)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete m_command;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_command = newCommand;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_command-&gt;Execute();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>}</li>
+                  <li></li>
+                  <li>Command* Actor::HandleInput()</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Bキーが押されたら。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;if (IsKeyDown(B))</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプさせる。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vector3 destPosition = m_position;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;destPosition.y += 50.0f;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new Command(destPosition, this);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//右キーが押されたら。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;if (IsKeyDown(Right))</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//右に移動させる。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vector3 destPosition = m_position;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;destPosition.x += 50.0f;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new Command(destPosition, this);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//左キーが押されたら。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;if (IsKeyDown(Left))</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//左に移動させる。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vector3 destPosition = m_position;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;destPosition.x -= 50.0f;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new Command(destPosition, this);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;return nullptr;</li>
+                  <li></li>
+                  <li>}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                ActorのHandleInput関数では、<span class="strong-letter">入力があった時にのみCommanインスタンスを生成</span>しています。
+                このようにCommandインスタンスを使い捨てしています。この使い捨てが後々利になって返ってきます。
+                <br>後は、CommandインスタンスのUndo関数とExecute関数を呼び出すだけで、取り消しと再実行の実装は完了です。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>void Actor::Update()</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;auto newCommand = HandleInput();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;if (newCommand != nullptr)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete m_command;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_command = newCommand;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_command-&gt;Execute();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//Ctrlキーが押されたら。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">if (IsKeyDown(Ctrl))</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">{</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//Zキーが押されたら。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">if (IsKeyDown(Z))</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">{</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//処理を取り消す。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">m_command-&gt;Undo();</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">}</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//Yキーが押されたら。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">if (IsKeyDown(Y))</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">{</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//処理を再実行する。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">m_command-&gt;Execute();</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">}</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">}</span></li>
+                  <li>}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                如何でしょうか。Commandパターンを活用すれば、取り消しと再実行の実装が驚くほど簡単にできます。
+              </div>
+            </div>
+          </div>
+          <li id="4"><h2 class="margin-letter2">2.4 課題2</h2></li>
+          <div class="letter">
+            <div>
+              task/Command/Practice2/Game.slnからVisualStudioを立ち上げてください。
+              <br><span class="strong-letter">・コマンドパターンを使用して、Actorの移動処理を実装してください。</span>
+              <br><span class="strong-letter">・Ctrl+Z、Ctrl+Yでそれぞれ処理の取り消しと再実行を行えるようにしてください。</span>
+              <ul>
+                <li>ActorクラスのHandleInput関数を完成させてください。</li>
+                <li>MoveActorCommandクラスを完成させてください。</li>
+                <li>Ctrl+Z、Ctrl+Yの入力判定は、それぞれ<span class="strong-letter">g_keyboard->IsKeyDown(Keyboard::LeftControl) && g_keyboard->IsKeyTrigger(Keyboard::Z)</span>と
+                <span class="strong-letter">g_keyboard->IsKeyDown(Keyboard::LeftControl) && g_keyboard->IsKeyTrigger(Keyboard::Y)</span>で行ってください。
+                </li>
+                <li>Answewr1に実装例があるので、参考にしてください。</li>
+              </ul>
+            </div>
+          </div>
+          <li id="5"><h2 class="margin-letter2">2.5 チャレンジ問題</h2></li>
+          <div class="letter">
+            <div> 
+              Practice2を引き続き使用して、多段取り消し・再実行を実装してみましょう。
+              <ul>
+                <li>ActorクラスにCommandクラスの配列を持たせます。</li>
+                <li>Commandインスタンスが生成されれば、Execute関数を呼び出し、配列に追加します。</li>
+                <li>取り消しの際には、現在のCommandインスタンス(以後カレントCommand)のUndo関数を呼び出し、カレントCommandの1つ前の要素をカレントCommandとします。</li>
+                <li>再実行の際には、カレントCommandの1つ後の要素をカレントCommandとし、カレントCommandのExecute関数を呼び出します。</li>
+                <li>カレントCommandが配列の途中の要素である時に新しい入力があった場合は、カレントCommand以降の配列の要素を全て削除します。そして、新しいCommandインスタンスを配列に追加します。</li>
+                <li>Answer2に実装例があるので、参考にしてください。</li>
+              </ul>
             </div>
           </div>
         </ul>
