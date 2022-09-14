@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>デザインパターン2 第三章</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/template.css">
+    <script src="../js/template.js"></script>
+  </head>
+
+    <body>
+      
+      <div id="box">
+      </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+      </script>
+      <script>
+        jQuery(function(){
+          $('#box').load('html/header.html') // #headerにheader.htmlを読み込む
+        });
+      </script>
+      <div class="title">
+        <h1>第三章 Fly Weightパターン</h1>
+      </div>
+      <div class="letter-body">
+        <ul id="list1">
+          <li id="1"><h2 class="margin-letter2">3.1 Fly Weightパターン</h2></li>
+          <div class="letter">
+            <div>
+                第三章では、Fly Wightパターンについて見ていきましょう。
+                Fly Weightパターンは、<span class="strong-letter">等価なインスタンスを別々の箇所で使用する際に、1つのインスタンスを再利用する</span>デザインパターンです(Wikipediaより)。
+                ゲームでは様々な箇所でFly Weightパターンが利用されていますが、今回はその中でも特にゲーム実行時に影響の大きい<span class="strong-letter">インスタンシング描画</span>について見ていきましょう。
+                <div class="margin-letter">
+                    ゲームでは、以下のように同じオブジェクトを大量に描画しなければならない場面が存在します。
+                </div>
+                <div>
+                    <img src="image/2/1.jpg" class="margin-letter">
+                    <br>ファイアーエムブレム無双 風化雪月より
+                </div>
+                <div class="margin-letter">
+                    敵キャラクターが大量に描画されているのが分かるでしょうか。キャラクターだけでなく、草や木などのオブジェクトを大量に描画しなければならない場面もありますよね。
+                    <br>この際に、1つのオブジェクトごとにモデルデータを用意していては、メモリを大量消費してしまうことになりますし、処理も遅くなってしまいます。
+                </div>
+                <div>
+                    <img src="image/2/2.png" class="margin-letter">
+                </div>
+                <div class="margin-letter">
+                    オブジェクトの数が少なければ大丈夫ですが、何百・何千個ともなるとメモリや処理速度への影響は計り知れません。
+                    では、どうすればいいのでしょうか。
+                </div>
+                <div class="margin-letter">
+                    この場合、描画するオブジェクトのモデルが同じなのであれば、そのモデルデータを再利用しましょう。
+                    位置情報はそれぞれ別なので、これは再利用できませんね。
+                </div>
+                <div>
+                    <img src="image/2/3.png" class="margin-letter">
+                </div>
+                <div class="margin-letter">
+                    これが、<span class="strong-letter">インスタンシング描画</span>の概念になります。
+                </div>
+                <div class="margin-letter">
+                    k2Engineでは、ModelRenderクラスにインスタンシング描画の機能が実装されています。ModelRenderに行列の配列を持たせることで、インスタンシング描画を実装しています。
+                    1つのモデルデータとこの行列配列により、1回のドローコールで一気にモデルを描画してしまいます。
+                </div>
+                <div>
+                    <img src="image/2/4.png" class="margin-letter">
+                </div>
+            </div>
+          </div>
+          <li id="2"><h2 class="margin-letter2">3.2 練習問題1</h2></li>
+          <div class="letter">
+            <div>
+                practice/FlyWeight/Practice1/Game.slnからVisualStudioを立ち上げてください。
+                実行してみると、100個のレバーが描画されています。
+                <div>
+                    <img src="image/2/5.png" class="margin-letter">
+                </div>
+                <div class="margin-letter">
+                    <span class="strong-letter">LeverRenderを改造して、レバーの描画をインスタンシング描画に変更してください。</span>
+                    <ul>
+                      <li>必要なModelRenderインスタンスは<span class="strong-letter">1つ</span>だけです。</li>
+                      <li>ModelRenderのInit関数で最大描画個数を設定します。</li>
+                      <li>ModelRenderのUpdateInstancingData関数を実行すると、ModelRenderの行列配列に行列が追加されます。</li>
+                      <li>Answerに実装例がありますので、参考にしてください。</li>
+                    </ul>
+                </div>
+            </div>
+          </div>
+        </ul>
+    </div>
+</body>
+</html>

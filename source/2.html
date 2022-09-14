@@ -28,7 +28,8 @@
           <li id="1"><h2 class="margin-letter2">2.1 Commandパターン</h2></li>
           <div class="letter">
             <div>
-                第二章では、Commandパターンについて学んで行きます。
+                第二章からは、デザインパターンのゲーム開発における活用事例を学んでいきます。
+                今回はCommandパターンについて学んで行きます。
                 Commandパターンは、関数呼び出しをオブジェクトに変換して扱うパターンになります。
                 コールバック関数や関数ポインタといった概念と類似しています。
                 <br>では、コマンドパターンの実装例を見ていきましょう。
@@ -68,6 +69,7 @@
                 </div>
                 <div>
                   <img src="image/1/1.webp" class="margin-letter">
+                  <br>Phantasy Star Online2より
                   <br>（C）SEGA
                 </div>
                 <div class="margin-letter">
@@ -193,10 +195,10 @@
             </div>
           </div>
           </div>
-          <li id="2"><h2 class="margin-letter2">2.2 課題1</h2></li>
+          <li id="2"><h2 class="margin-letter2">2.2 練習問題1</h2></li>
           <div class="letter">
             <div>
-              task/Command/Practice1/Game.slnからVisualStudioを立ち上げてください。
+              practice/Command/Practice1/Game.slnからVisualStudioを立ち上げてください。
               Actorクラスが下記のように実装されています。
               <div>
                 <code>
@@ -237,7 +239,7 @@
             <div>
               ここまで、Commandパターンの実装例を見てきました。
               ですが、Commandパターンの利点はこれだけではありません。
-              それは、ソフトウェアにありがちな<span class="strong-letter">「取り消し」と「再実行」機能の実装の際に、Commandパターンを使用すれば非常に楽に実装が可能</span>という点です。
+              それは、ソフトウェアにありがちな<span class="strong-letter">「取り消し」と「再実行」機能の実装の際に、Commandパターンを使用すれば非常に楽に実装が可能</span>という点です(よくCtrl+Z、Ctrl+Yで実行されますね)。
               寧ろ、この利点がCommandパターンで最も良く知られている使用方法になります。
               <br>では、取り消しと再実行の実装例を見ていきましょう。まずは、Commandクラスです。
               先ほどのCommandクラスとは、少し違うことに注意してください。
@@ -287,7 +289,7 @@
                 Commandクラスに新しく<span class="strong-letter">Undo関数</span>という関数を実装しています。この<span class="strong-letter">Undo関数を呼び出すことにより、Execute関数によって実行された処理を元に戻します。</span>
                 また、前の例ではActorとCommandクラスを切り離していましたが、この例では動作させたいActorとCommandクラスを結び付けています。
                 さらに、<span class="strong-letter">Actorを移動させる前の状態を記録するために、メンバ変数m_beforePosition</span>を定義しています。
-                このCommandクラスは、色々な状況で使用できる汎用的なクラスではありません。このCommandクラスは、ある特定の時点に実行する処理を表しています。
+                このCommandクラスは、先ほどのような色々な状況で使用できる汎用的なクラスではありません。このCommandクラスは、特定地点でのActorへの具体的な移動処理とActorの位置の記録という役割を担っています。
                 <br>Actorクラスの実装を見ていきましょう。
               </div>
               <div class="margin-letter">
@@ -372,21 +374,28 @@
                   </ol></code>
               </div>
               <div class="margin-letter">
-                如何でしょうか。Commandパターンを活用すれば、取り消しと再実行の実装が驚くほど簡単にできます。
+                如何でしょうか。Commandパターンを活用すれば、取り消しと再実行の実装が驚くほど簡単に実装できます。
+              </div>
+              <div class="margin-letter">
+                <h4>取り消しと再実行</h4>
+                <ul>
+                  <h4><li>Commandパターンを使用すれば、「取り消し」と「再実行」の実装が容易。</li></h4>
+                  
+                </ul>
               </div>
             </div>
           </div>
-          <li id="4"><h2 class="margin-letter2">2.4 課題2</h2></li>
+          <li id="4"><h2 class="margin-letter2">2.4 練習問題2</h2></li>
           <div class="letter">
             <div>
-              task/Command/Practice2/Game.slnからVisualStudioを立ち上げてください。
+              practice/Command/Practice2/Game.slnからVisualStudioを立ち上げてください。
               <br><span class="strong-letter">・コマンドパターンを使用して、Actorの移動処理を実装してください。</span>
-              <br><span class="strong-letter">・Ctrl+Z、Ctrl+Yでそれぞれ処理の取り消しと再実行を行えるようにしてください。</span>
+              <br><span class="strong-letter">・Ctrl+Z、Ctrl+Yで移動処理の取り消しと再実行を行えるようにしてください。</span>
               <ul>
                 <li>ActorクラスのHandleInput関数を完成させてください。</li>
                 <li>MoveActorCommandクラスを完成させてください。</li>
-                <li>Ctrl+Z、Ctrl+Yの入力判定は、それぞれ<span class="strong-letter">g_keyboard->IsKeyDown(Keyboard::LeftControl) && g_keyboard->IsKeyTrigger(Keyboard::Z)</span>と
-                <span class="strong-letter">g_keyboard->IsKeyDown(Keyboard::LeftControl) && g_keyboard->IsKeyTrigger(Keyboard::Y)</span>で行ってください。
+                <li>Ctrl+Z、Ctrl+Yの入力判定は、それぞれ<span class="strong-letter">g_keyboard->IsKeyDown(Keyboard::LeftControl)と
+                  g_keyboard->IsKeyTrigger(Keyboard::Z)、g_keyboard->IsKeyTrigger(Keyboard::Y)</span>で行ってください。
                 </li>
                 <li>Answewr1に実装例があるので、参考にしてください。</li>
               </ul>
@@ -395,7 +404,7 @@
           <li id="5"><h2 class="margin-letter2">2.5 チャレンジ問題</h2></li>
           <div class="letter">
             <div> 
-              Practice2を引き続き使用して、多段取り消し・再実行を実装してみましょう。
+              <span class="strong-letter">Practice2を引き続き使用して、多段取り消し・再実行を実装してみましょう。</span>
               <ul>
                 <li>ActorクラスにCommandクラスの配列を持たせます。</li>
                 <li>Commandインスタンスが生成されれば、Execute関数を呼び出し、配列に追加します。</li>
@@ -404,6 +413,9 @@
                 <li>カレントCommandが配列の途中の要素である時に新しい入力があった場合は、カレントCommand以降の配列の要素を全て削除します。そして、新しいCommandインスタンスを配列に追加します。</li>
                 <li>Answer2に実装例があるので、参考にしてください。</li>
               </ul>
+              <div class="video margin-letter">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/FYTfAFXym94" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              </div>
             </div>
           </div>
         </ul>
