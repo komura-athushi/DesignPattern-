@@ -12,7 +12,8 @@
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="LeverRender.cpp" />
+    <ClCompile Include="World.cpp" />
+    <ClCompile Include="Lever.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -20,6 +21,7 @@
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="Game.h" />
-    <ClInclude Include="LeverRender.h" />
+    <ClInclude Include="World.h" />
+    <ClInclude Include="Lever.h" />
   </ItemGroup>
 </Project>

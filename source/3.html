@@ -87,6 +87,142 @@
                 </div>
             </div>
           </div>
+          <li id="3"><h2 class="margin-letter2">3.3 タイルベースの地面</h2></li>
+          <div class="letter">
+            <div>
+              もう1つ、FlyWeightパターンの活用事例を紹介しましょう。
+              <br>以下のようなゲームでは、ステージがタイル(マス目)で出来ており、1つ1つのタイルごとに様々なパラメータが設定されています。
+              <div>
+                <img src="image/2/6.jpg" class="margin-letter">
+                <br>ファイアーエムブレム覚醒より
+              </div>
+              <div class="margin-letter">
+                ごく普通に実装するとすれば、このような感じでしょうか。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//1つ1つのタイルを表す。</font></li>
+                  <li>struct Tile</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//タイルのタイプ。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;enTile_Type s_tileType;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//回避率補正。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;float s_evasionRate;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//防御率補正。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;float s_deffenceRate;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//攻撃率補正。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;float s_attackRate;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//描画するモデル。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Model s_model;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//...</font></li>
+                  <li>};</li>
+                  <li></li>
+                  <li>class World</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//指定位置のタイルを取得。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Tile* GetTile(const int x, const int y)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return &m_tileList[x][y];</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//...</font></li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//...</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Tile m_tileList[WIDHT][HEIGHT];</li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                一見、問題は無さそうに見えます。ですが、構造体のインスタンスを何個も保持していては、(インスタンシング描画でも話しましたが)メモリと処理速度に影響が出かねません。
+                ステージが広ければ尚更です。
+              </div>
+              <div class="margin-letter">
+                そこで、Fly Weightパターンを活用します。
+                <br>まず、Tileの配列をポインタにし、それぞれ種類別のTileインスタンスを用意します。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>class World</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//指定位置のタイルを取得。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Tile* GetTile(const int x, const int y)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return m_tileList[x][y];</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//...</font></li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//...</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Tile* m_tileList[WIDHT][HEIGHT];        <font style="color:lightgreen;font-style:italic;">//ポインタの配列にする。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Tile m_tree;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//木のタイル。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Tile m_flatGround;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//平地のタイル。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Tile m_fort;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//砦のタイル。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Tile m_sea;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//海のタイル。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//..</font></li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                そして、ステージ生成時に、配列に種類ごとのTileインスタンスのポインタを入れるようにします。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//ステージを生成する。</font></li>
+                  <li>void World::MakeStage()</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; WIDTH; i++)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (int j = 0; j &lt; HEIGHT; j++)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//...</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//タイルのタイプが海なら。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (TileType == Type_Sea)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//海タイルのポインタを入れる。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_tileList[i][j] = &m_sea;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//タイルのタイプが木なら。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else if (TileType == Type_Tree)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//木タイルのポインタを入れる。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_tileList[i][j] = &m_tree;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//...</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                如何でしょうか。配列の要素をポインタにしたことにより、メモリの使用量を減らすことが出来ました。
+                この例ですと、「木タイル」や「海タイル」などを再利用していますね。
+                <br>このように、Fly Weightパターンは何かを大量に扱う際には非常に有効なデザインパターンです。
+              </div>
+            </div>
+          </div>
+          <li id="4"><h2 class="margin-letter2">3.4 練習問題2</h2></li>
+          <div class="letter">
+            <div>
+              practice/FlyWeight/Practice2/Game.slnからVisualStudioを立ち上げてください。
+              実行してみると、400個のレバーが描画されています。
+              <div>
+                <img src="image/2/7.png" class="margin-letter">
+              </div>
+              <div class="margin-letter">
+                <span class="strong-letter">各レバーをインスタンシング描画に変更してください。</span>
+                <br><span class="strong-letter">WorldクラスのGetEnLever関数で、指定位置に配置されているLeverの種類が取得できるようにしてください。</span>
+                <ul>
+                  <li>WorldクラスのLever変数の配列をLeverポインタの配列に変更してください。</li>
+                  <li>通常レバー・青いレバー・赤いレバーのLeverインスタンスをそれぞれ1つずつ用意し、そのインスタンスのポインタを配列に格納するようにしてください。</li>
+                  <li>WorldクラスとLeverクラスを改造してください。</li>
+                  <li>Answerに実装例がありますので、参考にしてください。</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </ul>
     </div>
 </body>

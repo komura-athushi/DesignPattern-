@@ -1,6 +1,6 @@
 #pragma once
 
-class LeverRender;
+class World;
 
 class Game : public IGameObject
 {
@@ -12,6 +12,6 @@ public:
 	void Render(RenderContext& rc);
 
 private:
-	LeverRender* m_leverRender = nullptr;
+	World* m_world = nullptr;
 };
 

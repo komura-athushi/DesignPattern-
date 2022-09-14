@@ -36,7 +36,8 @@ namespace nsK2EngineLow {
 		bool isDepthWrite,
 		bool isDepthTest,
 		D3D12_CULL_MODE cullMode,
-		ComputeAnimationVertexBuffer* computedAnimationVertexBuffer
+		ComputeAnimationVertexBuffer* computedAnimationVertexBuffer,
+		const char* filePath
 	)
 	{
 		m_meshs.resize(tkmFile.GetNumMesh());
@@ -57,7 +58,8 @@ namespace nsK2EngineLow {
 				isDepthWrite,
 				isDepthTest,
 				cullMode,
-				computedAnimationVertexBuffer
+				computedAnimationVertexBuffer,
+				filePath
 			);
 			meshNo++;
 		});
@@ -137,7 +139,8 @@ namespace nsK2EngineLow {
 		bool isDepthWrite,
 		bool isDepthTest,
 		D3D12_CULL_MODE cullMode,
-		ComputeAnimationVertexBuffer* computedAnimationVertexBuffer
+		ComputeAnimationVertexBuffer* computedAnimationVertexBuffer,
+		const char* filePath
 	) {
 		//1. 頂点バッファを作成。
 		int numVertex = (int)tkmMesh.vertexBuffer.size();
@@ -205,7 +208,7 @@ namespace nsK2EngineLow {
 			sprintf_s(
 				materiayKey,
 				MAX_PATH,
-				"%s, %s, %s, %s, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %s, %s, %s",
+				"%s, %s, %s, %s, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %s, %s, %s, %s",
 				fxFilePath,
 				vsEntryPointFunc,
 				vsSkinEntryPointFunc,
@@ -224,7 +227,8 @@ namespace nsK2EngineLow {
 				cullMode,
 				tkmMat.albedoMapFileName.empty() ? "none" : tkmMat.albedoMapFileName.c_str(),
 				tkmMat.normalMapFileName.empty() ? "none" : tkmMat.normalMapFileName.c_str(),
-				tkmMat.specularMapFileName.empty() ? "none" : tkmMat.specularMapFileName.c_str()
+				tkmMat.specularMapFileName.empty() ? "none" : tkmMat.specularMapFileName.c_str(),
+				filePath
 			);
 			auto mat = materialBank.Get(materiayKey);
 			if (mat == nullptr) {
