@@ -30,7 +30,7 @@
             <div>
                 第二章からは、デザインパターンのゲーム開発における活用事例を学んでいきます。
                 今回はCommandパターンについて学んで行きます。
-                Commandパターンは、関数呼び出しをオブジェクトに変換して扱うパターンになります。
+                Commandパターンは、<span class="strong-letter">関数呼び出しをオブジェクトに変換して扱うパターン</span>になります。
                 コールバック関数や関数ポインタといった概念と類似しています。
                 <br>では、コマンドパターンの実装例を見ていきましょう。
                 <div class="margin-letter">
@@ -182,16 +182,7 @@
                 <div class="margin-letter">
                   如何でしょうか。動作をオブジェクトにすることにより、動作の入れ替えが容易になりました。
                   また、引数のアクターを切り替えることにより、<span class="strong-letter">プレイヤーだけでなく他の任意のアクターを動かすことも可能</span>になりました。
-                  <br>このCommandパターンは、AIの実装において有効な手段となります。
-                  攻撃的なAIを実装したければ、攻撃的な専用コマンドを生成するだけでいいのです。
-                <div class="margin-letter">
-                  <h4>Commandパターン</h4>
-                  <ul>
-                    <h4><li>「動作」をオブジェクトにする</li></h4>
-                    <h4><li>様々なクラスで使いまわせる</li></h4>
-                    <h4><li>動作の切り替えが容易に</li></h4>
-                  </ul>
-                </div>
+                  <br>このCommandパターンは、AIの実装において有効な手段となります。コマンドを選択するAIを実装し、各キャラクターごとに割り当てます。攻撃的なキャラクターを作りたければ、攻撃的なAIを実装し、専用のコマンドを実行させればよいのです。
             </div>
           </div>
           </div>
@@ -376,21 +367,14 @@
               <div class="margin-letter">
                 如何でしょうか。Commandパターンを活用すれば、取り消しと再実行の実装が驚くほど簡単に実装できます。
               </div>
-              <div class="margin-letter">
-                <h4>取り消しと再実行</h4>
-                <ul>
-                  <h4><li>Commandパターンを使用すれば、「取り消し」と「再実行」の実装が容易。</li></h4>
-                  
-                </ul>
-              </div>
             </div>
           </div>
           <li id="4"><h2 class="margin-letter2">2.4 練習問題2</h2></li>
           <div class="letter">
             <div>
               practice/Command/Practice2/Game.slnからVisualStudioを立ち上げてください。
-              <br><span class="strong-letter">・コマンドパターンを使用して、Actorの移動処理を実装してください。</span>
-              <br><span class="strong-letter">・Ctrl+Z、Ctrl+Yで移動処理の取り消しと再実行を行えるようにしてください。</span>
+              <br><span class="strong-letter">コマンドパターンを使用して、Actorの移動処理を実装してください。</span>
+              <br><span class="strong-letter">Ctrl+Z、Ctrl+Yで移動処理の取り消しと再実行を行えるようにしてください。</span>
               <ul>
                 <li>ActorクラスのHandleInput関数を完成させてください。</li>
                 <li>MoveActorCommandクラスを完成させてください。</li>
