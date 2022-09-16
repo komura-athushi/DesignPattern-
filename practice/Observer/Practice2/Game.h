@@ -1,6 +1,7 @@
 #pragma once
 
-class World;
+class Actor;
+class Observer;
 
 class Game : public IGameObject
 {
@@ -12,6 +13,8 @@ public:
 	void Render(RenderContext& rc);
 
 private:
-	World* m_world = nullptr;
+	Actor* m_actor = nullptr;
+	Observer* m_makeSoundEngine = nullptr;
+	Observer* m_achievement = nullptr;
 };
 

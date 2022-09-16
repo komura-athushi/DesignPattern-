@@ -236,6 +236,137 @@
                 </div>
             </div>
           </div>
+          <li id="3"><h2 class="margin-letter2">4.3 問題点</h2></li>
+          <div class="letter">
+            <div>
+              Observerパターンにも批判がないわけではありません。
+              それでは、Observerパターンでよく批判される点を見ていきましょう。
+              <div class="margin-letter">
+                <ol>
+                  <h5><li>処理速度が遅い</li></h5>
+                  よくObserverパターンの詳細を知らないプログラマーからの批判に、「処理速度が遅い」
+                  そういう人たちは、継承や間接参照(ポインタ)といったものは処理速度を遅くしてしまうという、先入観を持ってしまっています。
+                  <br>ですが、Observerパターンを学んだ皆さんなら、これが事実ではないことがお分かりでしょう。
+                  Observerパターンは、SubjectからObserverのリストを順に見て仮想関数を呼び出すだけなのです。確かに静的バッチより実行速度がほんの少し遅くなりますが(仮想関数は動的バッチになる？)、これは無視できるものです。
+                  そもそも、<span class="strong-letter">Observerパターンは実行頻度がそれほど高くない部分に使用する</span>ものであり、処理速度が遅いという問題は問題にするほどのことではありません。
+                  <h5><li>動的メモリ確保の処理が多すぎる</li></h5>
+                  先ほどの実装例では、SubjectにObserverの配列を持たせ、Observerの登録や削除に対応しました。
+                  しかし、<span class="strong-letter">Observerの登録・削除には、動的メモリ確保やメモリ解放(プログラム実行中にメモリ確保・解放が行われること)</span>が行われてしまいます。
+                  ゲームの開始時に、Observerの登録・削除を行うようにすれば、メモリは最小限の量で確保され保持されます。
+                  <br>それでも動的メモリ確保が問題だという場合のために、動的メモリ確保を全く伴わずにObserverの登録と削除を行う方法を見ていきましょう。
+                </ol>  
+              </div>
+            </div>
+          </div>
+          <li id="4"><h2 class="margin-letter2">4.4 連結オブザーバー</h2></li>
+          <div class="letter">
+            <div>
+              <span class="strong-letter">連結リスト</span>を使用します。今回は、連結リストの中でも、<span class="strong-letter">片方向リスト</span>を作成したいと思います。
+              詳しくはこちらのサイトを参照してください。<a href="https://ufcpp.net/study/algorithm/col_flist.html">片方向連結リスト</a>
+              <br>図にするとこのような感じです。
+              <div>
+                <img src="image/3/2.png" class="margin-letter">
+              </div>
+              <div class="margin-letter">
+                ではまず、Observerに連結リストの次のObserverへアクセスするためのメンバ変数m_nextを宣言しましょう。
+                Subjectからアクセスしたいので、Subjectをフレンドクラスに設定します。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>class Observer</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;virtual ~Observer() {}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;virtual void OnNotify(EnEvent eventType) = 0;</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//Subjectからm_nextにアクセスしたいので、フレンドクラスにする。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">friend class Subject;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//連結リストの次の要素であるObserverのポインタ。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">Observer* m_next = nullptr;</span></li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                Subjectには、Observerの連結リストの先頭のポインタを保持させるようにします。
+                また、配列から連結リストへの変更に伴い、各メンバ関数を修正します。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>class Subject : public IGameObject</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;~Subject() override{}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;virtual bool Start()override { return true; }</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;virtual void Update()override{}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//オブザーバーを連結リストに追加する。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void AddObserver(Observer* observer)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//オブザーバーを連結リストの先頭に追加する。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">observer-&gt;m_next = m_head;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">m_head = observer;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//オブザーバーを連結リストから除去する。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void RemoveObserver(Observer* observer)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//除去するオブザーバーが連結リストの先頭なら。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">if (m_head == observer)</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">{</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">m_head = observer-&gt;m_next;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">observer-&gt;m_next = nullptr;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">return;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">}</span></li>
+                  <li></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">Observer* currentObserver = m_head;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">while (currentObserver != nullptr)</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">{</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">if (currentObserver-&gt;m_next == observer)</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">{</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">currentObserver-&gt;m_next = observer-&gt;m_next;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">observer-&gt;m_next = nullptr;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">return;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">}</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">currentObserver = currentObserver-&gt;m_next;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">}</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>protected:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//オブザーバーにイベントを通知。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Notify(EnEvent eventType)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//連結リストでそれぞれの要素にアクセスする際の基本の形。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">Observer* currentObserver = m_head;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">while (currentObserver != nullptr)</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">{</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">currentObserver-&gt;OnNotify(eventType);</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">currentObserver = currentObserver-&gt;m_next;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">}</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//Observer連結リストの先頭のポインタ。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">Observer* m_head = nullptr;</span></li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                以上です。関数の引数は変更していないので、SubjectにObserverを追加する部分は変更ありません。
+                <br>しかし、この場合ですと動的確保は行われませんが、Observerは一度に単一のSubjectしか監視することができません。
+                Observer自身が連結リストのノードになっているためです。勿論、それを回避する方法もあるのですが、長くなるので割愛させていただきます(概要は書籍に)。
+              </div>
+            </div>
+          </div>
+          <li id="5"><h2 class="margin-letter2">4.5 練習問題2</h2></li>
+          <div class="letter">
+            <div>
+              practice/Observer/Practice2/Game.slnからVisualStudioを立ち上げてください。
+              Practice1と同じように、A・Bキーを押すと音が鳴り、Enterキーでテキストが表示されるようになっています。
+              <span class="strong-letter">SubjectにObserverの配列を保持させていますが、Observerの片方向リストを使用するように変更してください。</span>
+              <ul>
+                <li>Answerに実装例がありますので、参考にしてください。</li>
+                <li>出来た学生は、片方向リストを双方向リストにしてみてください(<a href="https://ufcpp.net/study/algorithm/col_blist.html">参考</a>)。</li>
+              </ul>
+            </div>
+          </div>
         </ul>
     </div>
 </body>
