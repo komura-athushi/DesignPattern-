@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>デザインパターン2 第五章</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/template.css">
+    <script src="../js/template.js"></script>
+  </head>
+
+    <body>
+      
+      <div id="box">
+      </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+      </script>
+      <script>
+        jQuery(function(){
+          $('#box').load('html/header.html') // #headerにheader.htmlを読み込む
+        });
+      </script>
+      <div class="title">
+        <h1>第五章 Singletonパターン</h1>
+      </div>
+      <div class="letter-body">
+        <ul id="list1">
+          <li id="1"><h2 class="margin-letter2">5.1 Singletonパターン</h2></li>
+          <div class="letter">
+            <div>
+                第五章では、Singletonパターンについて学んでいきましょう。
+                <br>Singletonパターンとは、<span class="strong-letter">そのクラスのインスタンスが1つしかないことを保証し、グローバルなアクセスポイントを提供するデザインパターン</span>の1つです。
+                ゲーム開発では、エンジンクラスなど1つしかインスタンスが存在しない・してはいけないクラスを作成する際に使用されます。
+                <div class="margin-letter">
+                    一般的なSingletonパターンの実装例はこのようになります。
+                </div>
+                <div class="margin-letter">
+                    <code>
+                        <ol class="code-region row coll-11">
+                        <li><font style="color:lightgreen;font-style:italic;">//ファイルの読み書きをするクラス。</font></li>
+                        <li>class FileSystem</li>
+                        <li>{</li>
+                        <li>private:</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//外部からインスタンスを作成できないように。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//コンストラクタをprivateにする。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;FileSystem(){}</li>
+                        <li>public:</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//グローバルかついつでもアクセス可能な。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//関数。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;static FileSystem* GetInstance()</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ローカルstatic変数の初期化は。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//関数が呼ばれた際の一度しか行われない。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static FileSystem instance;</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return &amp;instance;</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                        <li>};</li>
+                        </ol></code>
+                </div>
+            </div>
+          </div>
+          <li id="2"><h2 class="margin-letter2">5.2 その他メリット</h2></li>
+          <div class="letter">
+            <div>
+                「<span class="strong-letter">インスタンスが1つであることを保障する</span>」、「<span class="strong-letter">グローバルなアクセスポイントを提供する</span>」、この2つがSingletonパターンの特徴になりますが、他にもメリットが存在します。
+                順に見ていきましょう。
+                <div class="margin-letter">
+                    <ol>
+                      <div class="margin-letter">
+                        <h5><li>関数が呼び出されなければ、インスタンスは生成されない</li></h5>
+                        上記のstatic変数は関数が呼び出されなければ、生成されません。つまり、<span class="strong-letter">インスタンスが必要になるその時まで、インスタンスは生成されない</span>ということです(メモリの節約)。
+                      </div>
+                      <div class="margin-letter">
+                        <h5><li>インスタンスの初期化は、関数が呼び出された際に実行される</li></h5>
+                        通常のグローバル変数やstaticメンバ変数では、main関数が呼び出される前に初期化されてしまいます。なので、ゲームが実行されて必要な情報が揃ってからの初期化をすることができません。
+                        ですが、Singletonパターンであれば、<span class="strong-letter">必要な情報が揃ってからのインスタンスの初期化が可能</span>です。
+                      </div>
+                      <div class="margin-letter">
+                        <h5><li>継承クラスインスタンス生成のカプセル化</li></h5>
+                        これは強力であるのに対し、しばしば見過ごされがちな使い方です。こちらに関しては、実例を見ていきましょう。
+                      </div>
+                    </ol>
+                </div>
+                <div class="margin-letter">
+                    Nintendo Switch、PS5などで発売予定のクラスプラットフォームゲームでの、ファイル読み書きを行うファイルシステムクラスを想像してみてください。
+                    実装するとしたらこのような感じでしょうか。
+                </div>
+                <div class="margin-letter">
+                    <code>
+                        <ol class="code-region row coll-11">
+                        <li><font style="color:lightgreen;font-style:italic;">//ファイルシステムクラス。</font></li>
+                        <li>class FileSystem</li>
+                        <li>{</li>
+                        <li><font style="color:lightgreen;font-style:italic;">//...</font></li>
+                        <li>}</li>
+                        <li></li>
+                        <li><font style="color:lightgreen;font-style:italic;">//PS5用のファイルシステムクラス。</font></li>
+                        <li>class PlayStation5FileSystem : public FileSystem</li>
+                        <li>{</li>
+                        <li><font style="color:lightgreen;font-style:italic;">//...</font></li>
+                        <li>}</li>
+                        <li></li>
+                        <li><font style="color:lightgreen;font-style:italic;">//NintendoSwitch用のファイルシステムクラス。</font></li>
+                        <li>cass NintendoSwitchFileSystem : public FileSystem</li>
+                        <li>{</li>
+                        <li><font style="color:lightgreen;font-style:italic;">//...</font></li>
+                        <li>}</li>
+                        <li></li>
+                        <li></li>
+                        <li>{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//プラットフォームがPS5なら。</font></li>
+                        <li>#if PLATFORM == PLAYSTATION5</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//PS5用のファイルシステムインスタンスを生成。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;m_fileSystem = new PlayStation5FileSystem;</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//プラットフォームがNintendoSwitchなら。</font></li>
+                        <li>#elif PLATFORM == NINTENDOSWITCH</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//NintendoSwitch用のファイルシステムインスタンスを生成。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;m_fileSystem = new NintendoSwitchFileSystem;</li>
+                        <li>#endif</li>
+                        <li>}</li>
+                        </ol></code>
+                </div>
+                <div class="margin-letter">
+                    しかし、#if文がプログラムのあちらこちらに点在するのはよろしくありません。もし、対応プラットフォームが増えれば、それだけ#if文を増やさなければなりません。
+                    ここで、Singletonパターンに注目してみましょう。Singletonパターンでは、インスタンスの生成を関数の中で行っています。この関数を利用しましょう。
+                </div>
+                <div class="margin-letter">
+                    <code>
+                        <ol class="code-region row coll-11">
+                        <li><font style="color:lightgreen;font-style:italic;">//インスタンスの生成に、Singletonパターンを活用。</font></li>
+                        <li>FileSystem* FileSystem::GetInstance()</li>
+                        <li>{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//プラットフォームがPS5なら。</font></li>
+                        <li>#if PLATFORM == PLAYSTATION5</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//PS5用のファイルシステムインスタンスを生成。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;static FileSystem* instance; = new PlayStation5FileSystem;</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//プラットフォームがNintendoSwitchなら。</font></li>
+                        <li>#elif PLATFORM == NINTENDOSWITCH</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//NintendoSwitch用のファイルシステムインスタンスを生成。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;static FileSystem* instance; = new NintendoSwitchFileSystem;</li>
+                        <li>#endif</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;return instance;</li>
+                        <li>}</li>
+                        </ol></code>
+                </div>  
+                <div class="margin-letter">
+                    <span class="strong-letter">インスタンス生成の処理を、FileSystemクラス内にカプセル化</span>することに成功しました。
+                    プラットフォームが何であろうと、FileSystem::GetInstance関数を呼び出すだけで、プラットフォームに対応したFileSystemクラスにアクセスすることができるようになりました。
+                    インスタンスにはどこからでもアクセス可能ですし、利用者側からはインスタンスの生成が隠蔽されています。
+                </div>
+                <div class="margin-letter">
+                    Singletonパターンを利用することによって、これ以上ない最上の実装を行うことができました。さあ、今日の仕事は終わりにして、ビールで乾杯しましょう!
+                </div>
+            </div>  
+          </div>
+          <li id="3"><h2 class="margin-letter2">5.3 練習問題1</h2></li>
+          <div class="letter">
+            <div>
+              practice/Singleton/Practice1/Game.slnからVisualStudioを立ち上げてください。
+              ソリューション構成によって、画面に文字が表示されます。
+              <div>
+                <img src="image/4/1.png" class="margin-letter">
+                <br><img src="image/4/2.png" class="margin-letter">
+              </div>
+              <div class="margin-letter">
+                <span class="strong-letter">ソリューション構成を表すConfigurationクラスを、Singletonパターンで実装してください。
+                <br>ソリューション構成に応じてのインスタンス生成を、Configurationクラスの静的メンバ関数で行うようにしてください。</span>
+                <ul>
+                  <li>Answerに実装例がありますので、参考にしてください。</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <li id="4"><h2 class="margin-letter2">5.4 Singletonパターンの使用をためらう理由</h2></li>
+          <div class="letter">
+            <div>
+              ここまでSingletonパターンの素晴らしさを力説してきましたが、Singletonパターンには幾つかの問題点が存在します。
+              <br>Singletonパターンは、言ってしまえばグローバル変数をカプセル化しただけのものですので、本質的にはグローバル変数と何ら変わりません。
+              そして、グローバル変数には下記のような問題点が存在します。
+              <ol>
+                <div class="margin-letter">
+                  <h5><li>バグ探しの難易度が上がる</li></h5>
+                  グローバル変数はその性質上、様々な要素から1つのインスタンスにアクセスが集中することになります。もし、変数に異常が見つかった場合、全てのグローバル変数を利用した関数呼び出しの中から、たった一箇所の誤りを探さなければなりません。
+                  何百万というコードの中から、関数呼び出しの箇所を検索しなければならない状況に陥れば＿＿＿＿＿＿誰だって、グローバル変数が大嫌いになるでしょう。
+                </div>
+                <div class="margin-letter">
+                  <h5><li>コードの結合度が上がる</li></h5>
+                  グローバル変数はその特性上、ファイルをincludeすれば如何なるクラスからも容易にインスタンスへのアクセスが可能になってしまいます。
+                  物理処理の中でサウンドを鳴らすという、物理シミュレーションとサウンド処理が結合してしまうことが、起こってしまうのです。
+                  これらの問題は、<span class="strong-letter">インスタンスへのアクセスを制限</span>することで解決できます。
+                </div>
+                <div class="margin-letter">
+                  <h5><li>マルチスレッドの妨げになる</li></h5>
+                  CPUがコア1つで動いている時代はとうの昔に過ぎ去りました。今はマルチスレッドが当たり前の時代になっています。
+                  あるインスタンスをグローバルにするということは、全ての要素からアクセス可能な領域を作るということです。あるスレッドで、グローバル変数にアクセスしたとしましょう。
+                  しかし、そのあるスレッドからは、他のスレッドがどのようにグローバル変数を扱っているか、知る由もありません。
+                  その場合、<span class="strong-letter">デッドロックや競合などといった、修正の大変難しいバグが発生</span>することになります。
+                </div>
+              </ol>
+              以上の問題点は、Singletonパターンにも当てはまるでしょう。そして、開発の規模が大きくなればなるほど、無視できない問題となるでしょう。
+              <div class="margin-letter">
+                また、Singletonパターンならではの問題点も存在します。
+                <ul>
+                  <div class="margin-letter">
+                    <h5><li>遅延初期化による制御困難</li></h5>
+                    Singletonパターンでは、static変数の初期化が関数が呼び出された際に実行されます。これはSingletonパターンの利点でもあり欠点でもあるのです。
+                    <br>ゲーム開発においては、フレームレートを落とさないために、また限られたメモリを上手く使用するために、メモリの割り当て・リソースの読み込みについては大変気を付けなければなりません。
+                    例えば、サウンドが最初に出力される際にサウンドシステムの初期化を行ってしまうと(それはゲームの最中でしょう)、フレームレートが落ちたり動きがギクシャクしてしまうかもしれません。
+                    また、サウンドシステムの初期化にヒープ(メモリ領域の1つ)上に大きなブロックを確保する必要があるのであれば、ヒープのどの位置に確保されるのかを制御するために初期化の正確な時期を知る必要があります。
+                  </div>
+                </ul>
+                この問題が発生するがために、以下のようなSingletonパターンを実装します。
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li>class FileSystem</li>
+                    <li>{</li>
+                    <li>public:</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;static FileSystem* GetInstance()</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return &amp;m_instance;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>private:</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;FileSystem(){}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//staticメンバ変数。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//プログラムの開始時に初期化が行われる。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;static FileSystem m_instance;</li>
+                    <li>};</li>
+                    </ol></code>
+                </div>
+              </div>
+            </div>
+          </div>
+          <li id="4"><h2 class="margin-letter2">5.5 代替手段</h2></li>
+          <div class="letter">
+            <div>
+              これらの問題点を解決するために、Singletonパターンに変わる代替手段を幾つか提示しましょう。
+              <ol>
+                <div class="margin-letter">
+                  <h5><li>クラスの必要性</li></h5>
+                  Singletonパターンが使用されるクラスは、オブジェクトのお世話をするだけの「マネージャークラス」であることが多いです。
+                  SoundManager、MonsterManagerといった具合です。時にはManagerの部分がSystemやEngineになっていることもありますが、同じ事です。
+                  次のManagerクラスを見てください。
+                  <div class="margin-letter">
+                    <code>
+                      <ol class="code-region row coll-11">
+                      <li><font style="color:lightgreen;font-style:italic;">//Bullet(弾)クラスをお世話するクラス。</font></li>
+                      <li>class BulletManager</li>
+                      <li>{</li>
+                      <li>public:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//弾を指定位置に作成する。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;Bullet* CreateBullet(Vector3&amp; position)</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bullet bullet = new Bullet();</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bullet-&gt;SetPosition(position);</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return bullet;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//指定された弾を移動させる。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;void MoveBullet(Bullet* bullet)</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vector3 position = bullet-&gt;GetPosition();</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;position.z += 10.0f;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bullet-&gt;SetPosition(position);</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//...</font></li>
+                      <li>};</li>
+                      </ol></code>
+                  </div>
+                  <div class="margin-letter">
+                    このコードを見れば、BulletManagerはSingletonにしようと思うのは当然です。では、最終的にBulletManagerのインスタンスは幾つひつようでしょうか。
+                    <br>答えは「0」です。
+                  </div>
+                  <div class="margin-letter">
+                    <code>
+                      <ol class="code-region row coll-11">
+                      <li>class Bullet</li>
+                      <li>{</li>
+                      <li>public:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//コンストラクタ。            これは初期化子リスト。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;Bullet(Vector3&amp; position) : m_position(position)</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//弾を移動させる。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;void Move()</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_position.z += 10.0f;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>private:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//座標。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;Vector3 m_position;</li>
+                      <li>};</li>
+                      </ol></code>
+                  </div>
+                  <div class="margin-letter">
+                    如何でしょうか。マネージャークラスはありませんが、問題ありません。マネージャークラスは、対象クラスの「ヘルパークラス」であることがよく見られます。
+                    可能であれば、その<span class="strong-letter">「ヘルプ」機能を対象クラスに移動</span>させてしまいましょう。
+                    そもそもOOP(オブジェクト指向プログラミング)というのは、クラスにクラス自身のお世話をさせるというものなのですから。
+                  </div>
+                </div>
+                <div class="margin-letter">
+                  <h5><li>インスタンス生成を1個に制限</li></h5>
+                  Singletonパターンを使用する目的として、インスタンス生成の個数を1個に制限したいというものがあります。
+                  Singletonパターンでは、グローバルなアクセスポイントを提供してしまいますが、単にインスタンス生成を1個に制限する方法ならあります。
+                  <div class="margin-letter">
+                    <code>
+                      <ol class="code-region row coll-11">
+                      <li>class FileSystem</li>
+                      <li>{</li>
+                      <li>public:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;FileSystem()</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//既にインスタンスが生成されていれば。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//プログラムを強制終了させる。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assert(!m_instantiated);</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_instantiated = true;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;~FileSystem()</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_instantiated = false;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>private:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//インスタンスが生成されればtrue。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;static bool m_instantiated = false;</li>
+                      <li>}</li>
+                      </ol></code>
+                  </div>
+                </div>
+                <div class="margin-letter">
+                  <h5><li>引数渡し</li></h5>
+                  もっとも単純かつ大抵の場合に最良の解決策であるのが、インスタンスを必要としている関数に引数として渡してやることです。
+                  <br>オブジェクトを描画する関数を考えてみましょう。描画のためには、画像デバイスや描画状態の管理が必要です。描画関係全ての関数にそういったものを、引数として渡すのが一般的です(パラメータ名はcontextのようなものがよく使われます)。
+                  <div class="margin-letter">
+                    <code>
+                      <ol class="code-region row coll-11">
+                      <li><font style="color:lightgreen;font-style:italic;">//ゲームオブジェクト。</font></li>
+                      <li>class GameObject</li>
+                      <li>{</li>
+                      <li>public:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//..</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//描画する関数。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//contextが描画に必要なインスタンス。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;void Draw(Context& context)</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//..</font></li>
+                      <li>};</li>
+                      <li></li>
+                      <li>{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;for (GameObject* gameObject : m_gameObjectList)</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//関数に、描画に必要なcontextを渡す。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gameObject-&gt;Draw(m_context)</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>}</li>
+                      </ol></code>
+                  </div>
+                  <div class="margin-letter">
+                    だからといって、何でもかんでも引数で渡せば良いというワケではありません。例えば、描画関数の主目的は描画をすることです。
+                    そこに、ログを出力するための引数を設定するのは、違和感があるでしょう。この場合は、別選択肢の考慮が必要になってきます。
+                  </div>
+                </div>
+                <div class="margin-letter">
+                  <h5><li>基底クラスから取得する</li></h5>
+                  ゲームのアーキテクチャ(構造)の多くは浅く広い継承階層であり、2階層だけということがよくあります。
+                  例えば、<span class="strong-letter">基底クラスGameObjectがありゲームに登場するオブジェクトは全てそこから派生したクラスで構成されている場合</span>です。
+                  そのような構造では、ゲームに登場するオブジェクトが基底クラスであるGameObjectにアクセスできるようになっています。それを利用すればいいのです。
+                </div>
+              </ol>
+            </div>
+          </div>
+        </ul>
+    </div>
+</body>
+</html>

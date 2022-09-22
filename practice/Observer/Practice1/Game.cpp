@@ -7,10 +7,8 @@
 
 bool Game::Start()
 {
-	m_makeSoundEngine = new MakeSoundEngine();
 	m_achievement = new Achievement();
 	m_actor = NewGO<Actor>(0);
-	m_actor->AddObserver(m_makeSoundEngine);
 	m_actor->AddObserver(m_achievement);
 
 

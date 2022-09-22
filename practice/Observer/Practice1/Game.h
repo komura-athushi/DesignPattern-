@@ -14,7 +14,6 @@ public:
 
 private:
 	Actor* m_actor = nullptr;
-	Observer* m_makeSoundEngine = nullptr;
 	Observer* m_achievement = nullptr;
 };
 

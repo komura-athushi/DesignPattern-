@@ -19,16 +19,6 @@ public:
 	virtual void OnNotify(EnEvent eventType) = 0;
 };
 
-//音を鳴らす。
-class MakeSoundEngine : public Observer 
-{
-public:
-	MakeSoundEngine();
-	~MakeSoundEngine() override{}
-	void OnNotify(EnEvent eventType) override{}
-
-};
-
 //実績解除クラス。
 class Achievement : public Observer 
 {

@@ -1,12 +1,6 @@
 #include "stdafx.h"
 #include "Observer.h"
 
-MakeSoundEngine::MakeSoundEngine()
-{
-	g_soundEngine->ResistWaveFileBank(0, "Assets/sound/push1.wav");
-	g_soundEngine->ResistWaveFileBank(1, "Assets/sound/push2.wav");
-}
-
 Achievement::Achievement()
 {
 	m_text = NewGO<Text>(0);
