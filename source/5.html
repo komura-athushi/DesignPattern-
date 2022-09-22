@@ -207,27 +207,38 @@
                     <br>ゲーム開発においては、フレームレートを落とさないために、また限られたメモリを上手く使用するために、メモリの割り当て・リソースの読み込みについては大変気を付けなければなりません。
                     例えば、サウンドが最初に出力される際にサウンドシステムの初期化を行ってしまうと(それはゲームの最中でしょう)、フレームレートが落ちたり動きがギクシャクしてしまうかもしれません。
                     また、サウンドシステムの初期化にヒープ(メモリ領域の1つ)上に大きなブロックを確保する必要があるのであれば、ヒープのどの位置に確保されるのかを制御するために初期化の正確な時期を知る必要があります。
+                    この問題が発生するがために、以下のようなSingletonパターンを実装します。
+                    <div class="margin-letter">
+                      <code>
+                        <ol class="code-region row coll-11">
+                        <li><font style="color:lightgreen;font-style:italic;">//基底クラス。</font></li>
+                        <li>class GameObject</li>
+                        <li>{</li>
+                        <li><font style="color:lightgreen;font-style:italic;">//派生クラス以外からのアクセスを禁止する。</font></li>
+                        <li>protected:</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;Log* GetLog()</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return &amp;m_log;</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                        <li>private:</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ログを出力するクラス。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;static Log m_log;</li>
+                        <li>};</li>
+                        <li></li>
+                        <li><font style="color:lightgreen;font-style:italic;">//敵クラス。</font></li>
+                        <li><font style="color:lightgreen;font-style:italic;">//GameObjectを継承。</font></li>
+                        <li>class Enemy : public GameObject</li>
+                        <li>{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;void Attack()</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//攻撃したというログを出力する。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GetLog.Write(<font style="color:lightcoral;">"Enemy attacked!"</font>);</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                        <li>};</li>
+                        </ol></code>
+                    </div>
                   </div>
                 </ul>
-                この問題が発生するがために、以下のようなSingletonパターンを実装します。
-                <div class="margin-letter">
-                  <code>
-                    <ol class="code-region row coll-11">
-                    <li>class FileSystem</li>
-                    <li>{</li>
-                    <li>public:</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;static FileSystem* GetInstance()</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return &amp;m_instance;</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
-                    <li>private:</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;FileSystem(){}</li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//staticメンバ変数。</font></li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//プログラムの開始時に初期化が行われる。</font></li>
-                    <li>&nbsp;&nbsp;&nbsp;&nbsp;static FileSystem m_instance;</li>
-                    <li>};</li>
-                    </ol></code>
-                </div>
               </div>
             </div>
           </div>
@@ -365,6 +376,74 @@
                   ゲームのアーキテクチャ(構造)の多くは浅く広い継承階層であり、2階層だけということがよくあります。
                   例えば、<span class="strong-letter">基底クラスGameObjectがありゲームに登場するオブジェクトは全てそこから派生したクラスで構成されている場合</span>です。
                   そのような構造では、ゲームに登場するオブジェクトが基底クラスであるGameObjectにアクセスできるようになっています。それを利用すればいいのです。
+                
+                  <div class="margin-letter">
+                    <code>
+                      <ol class="code-region row coll-11">
+                      <li><font style="color:lightgreen;font-style:italic;">//基底クラス。</font></li>
+                      <li>class GameObject</li>
+                      <li>{</li>
+                      <li>protected:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;Log* GetLog()</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return &amp;m_log;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>private:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ログを出力するクラス。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;static Log m_log;</li>
+                      <li>};</li>
+                      <li></li>
+                      <li><font style="color:lightgreen;font-style:italic;">//敵クラス。</font></li>
+                      <li><font style="color:lightgreen;font-style:italic;">//GameObjectを継承。</font></li>
+                      <li>class Enemy : public GameObject</li>
+                      <li>{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;void Attack()</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//攻撃したというログを出力する。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GetLog.Write(<font style="color:lightcoral;">"Enemy attacked!"</font>);</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>};</li>
+                      </ol></code>
+                  </div>
+                  <div class="margin-letter">
+                    これで、GameObject外にあるオブジェクトはLogクラスに一切のアクセスが出来なくなりますが、GameObjectの派生クラスであればアクセスすることができます。
+                  </div>
+                </div>
+                <div class="margin-letter">
+                  <h5><li>他のグローバルなクラスから取得する</li></h5>
+                  グローバル変数を無くそうという取り組み自体は素晴らしいものですが、大抵のコードにはグローバルにアクセス可能なクラスが存在します。
+                  GameやWorldクラスなど、インスタンスが1つしか存在しないクラスがこれにあたります。
+                  <br>そのクラスを通じて、LogやFileSystemといったクラスにアクセスするようにしてみましょう。
+                  <div class="margin-letter">
+                    <code>
+                      <ol class="code-region row coll-11">
+                      <li><font style="color:lightgreen;font-style:italic;">//ゲーム中に1つしか存在しないクラス。</font></li>
+                      <li>class Game</li>
+                      <li>{</li>
+                      <li>public:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;static Game* GetInstance()</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return &amp;m_instance;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Logを取得する。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;Log* GetLog()</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return m_log;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//FileSystemを取得する。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;FileSystem* GetFileSystem</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return m_fileSystem;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>private:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Gameのインスタンス。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;static Game m_instance;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;Log* m_log;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;FileSystem* m_fileSystem;</li>
+                      <li>};</li>
+                      </ol></code>
+                  </div>
+                  こうすれば、グローバルにアクセス可能なのはGameだけです。他のクラスは、Gameを介してのみアクセス可能になりました。
                 </div>
               </ol>
             </div>
