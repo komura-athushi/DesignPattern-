@@ -72,6 +72,38 @@
                 <div>
                   <img src="image/2/8.png" class="margin-letter">
                 </div>
+                <div class="margin-letter">
+                  k2Engineで、インスタンシング描画するには、以下のようにします。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li>bool GameObject::Start()</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//第5引数に描画するモデルの最大数を設定する。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;m_modelRender.Init(<font style="color:lightcoral;">"sample.tkm"</font>, nullptr, 0, enModelUpAxisZ, true, 100);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;return true;</li>
+                    <li>}</li>
+                    <li></li>
+                    <li>void GameObject::Update()</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;Vector3 pos = {0.0f,0.0f,0.0f}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; 100; i++)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pos.x += 50.f;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//UpdateInstancingDataで、それぞれの座標・回転・大きさを設定する。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_modelRender.UpdateInstancingData(i, pos, m_rotation, m_scale);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;m_modelRender.Update();</li>
+                    <li>}</li>
+                    <li></li>
+                    <li>void GameObject::Render(RenderContext&amp; rc)</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ドローコルは1回だけ。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;m_modelRender.Draw(rc);</li>
+                    <li>}</li>
+                    </ol></code>
+                </div>
             </div>
           </div>
           <li id="2"><h2 class="margin-letter2">3.2 練習問題1</h2></li>
@@ -86,8 +118,6 @@
                     <span class="strong-letter">LeverRenderを改造して、レバーの描画をインスタンシング描画に変更してください。</span>
                     <ul>
                       <li>必要なModelRenderインスタンスは<span class="strong-letter">1つ</span>だけです。</li>
-                      <li>ModelRenderのInit関数で最大描画個数を設定します。</li>
-                      <li>ModelRenderのUpdateInstancingData関数を実行すると、ModelRenderの行列配列に行列が追加されます。</li>
                       <li>Answerに実装例がありますので、参考にしてください。</li>
                     </ul>
                 </div>

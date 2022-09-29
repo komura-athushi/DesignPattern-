@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>デザインパターン2 第六章</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/template.css">
+    <script src="../js/template.js"></script>
+  </head>
+
+    <body>
+      
+      <div id="box">
+      </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+      </script>
+      <script>
+        jQuery(function(){
+          $('#box').load('html/header.html') // #headerにheader.htmlを読み込む
+        });
+      </script>
+      <div class="title">
+        <h1>第六章 Stateパターン</h1>
+      </div>
+      <div class="letter-body">
+        <ul id="list1">
+          <li id="1"><h2 class="margin-letter2">6.1 FSM(有限状態機械)</h2></li>
+          <div class="letter">
+            <div>
+                Stateパターンの説明の前に、FSM(有限状態機械)の説明を行いたいと思います。
+                <div class="margin-letter">
+                    アクションゲームの開発をしているとしましょう。
+                    Spaceキーを押せば、ジャンプです。簡単ですね。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li>void Actor::HandleInput()</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Bボタンが押されたら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;if (IsButtonDown(B))</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//上に移動させる。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_velocity.y = JUMP_VELOCITY;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプアニメーションを再生させる。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetAnimation(Jump);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>}</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  しかし、これだけでは<span class="strong-letter">ジャンプ中にも関わらずジャンプが出来てしまいます。</span>
+                  そこで、ジャンプ中かどうかを判断するフラグを追加しましょう。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li>void Actor::HandleInput()</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Bボタンが押されたら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;if (IsButtonDown(B))</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプ中ではなかったら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (m_isJump == false)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//上に移動させる。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_velocity.y = JUMP_VELOCITY;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプアニメーションを再生させる。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetAnimation(Jump);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプフラグをtrueに。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_isJump = true;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>}</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  次に、プレイヤーが地上に居る時にボタンを押すとプレイヤーがしゃがみ、ボタンを放すと直立姿勢に戻るようにしましょう。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li>void Actor::HandleInput()</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Bボタンが押されたら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;if (IsButtonDown(B))</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプ中ではなかったら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (m_isJump == false)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//上に移動させる。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_velocity.y = JUMP_VELOCITY;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプアニメーションを再生させる。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetAnimation(Jump);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプフラグをtrueに。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_isJump = true;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//下ボタンが押されたら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;else if (IsButtonPress(Down))</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプ中でないなら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (m_isJump == false)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//屈むアニメーションを再生する。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetAnimation(Duck);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//下ボタンが離されたら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;else if (IsButtonRelease(Down))</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//直立姿勢アニメーションを再生する。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetAnimation(Stand);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>}</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  しかし、これでは以下のようなことが起こってしまいます。
+                  <ul>
+                    <li>下ボタンで屈む。</li>
+                    <li>Bボタンでジャンプ。</li>
+                    <li>ジャンプ中に下ボタンを離す(<span class="strong-letter">直立姿勢のアニメーションが再生されてしまう</span>)。</li>
+                  </ul>
+                  これを避けるために、屈んでいるかどうかを判断するフラグを追加しましょう。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li>void Actor::HandleInput()</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Bボタンが押されたら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;if (IsButtonDown(B))</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプ中ではないかつ屈み中ではなかったら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (m_isJump == false &amp;&amp; m_isDucking == false)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//上に移動させる。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_velocity.y = JUMP_VELOCITY;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプアニメーションを再生させる。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetAnimation(Jump);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプフラグをtrueにする。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_isJump = true;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//下ボタンが押されたら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;else if (IsButtonPress(Down))</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプ中でないなら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (m_isJump == false)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//屈むアニメーションを再生する。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetAnimation(Duck);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//屈みフラグをtrueにする。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_isDucking = true;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//下ボタンが離されたら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;else if (IsButtonRelease(Down))</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//屈み中なら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (m_isDucking)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//屈みフラグをfalseにする。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_isDucking = false;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//直立姿勢アニメーションを再生する。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetAnimation(Stand);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>}</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  <ul>
+                    <li>ジャンプ</li>
+                    <li>屈み</li>
+                    <li>立ち</li>
+                  </ul>
+                  この3つの状態を実装するだけでも、if文とフラグが乱雑になり、分かりにくいプログラムになってしまいました。
+                  更に攻撃や移動の状態を追加するとなると、非常に面倒なことになるのは誰の目にも明かでしょう。
+                </div>
+                <div class="margin-letter">
+                  この分かりにくいプログラムを改善するために、プレイヤーの状態を一旦整理してみましょう。
+                </div>
+                <div>
+                  <img src="image/4/3.png" class="margin-letter">
+                </div>
+                <div class="margin-letter">
+                  これがFSM(有限状態機械)です。FSMの要点は以下の通りです。
+                  <ul>
+                    <h5>
+                      <li>機械のとることのできる固定の状態がある。</li>
+                      <li>機械は一度に1つの状態しかとることができない。</li>
+                      <li>一連の入力もしくはイベントが機械に与えられる。</li>
+                      <li>各状態は遷移に集合を持ち、入力に応じて状態を遷移する。</li>
+                    </h5>
+                  </ul>
+                </div>
+                <div class="margin-letter">
+                  <span class="strong-letter">状態・入力・遷移</span>、これが全てです。
+                  これを実装するための方法の1つがStateパターンになるのですが、その前に簡単なプログラムから実装してみましょう。
+                </div>
+                <div class="margin-letter">
+                  今までのプレイヤーは複数のフラグの組み合わせで、状態を表していました。
+                  これを、enum(列挙型)で表すようにしましょう。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li>enum</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;STATE_STANDING,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//立ち</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;STATE_JUMPING,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプ</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;STATE_DUCKING,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//屈み</font></li>
+                    <li>};</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  プレイヤーは沢山のフラグを保持していましたが、代わりにたった一つの変数m_stateがあるだけになります。
+                  また、以前のコードでは、入力→状態と分岐していました。なので、1つの状態に関するコードが、あちこちに分散していまいました。
+                  なので、最初に状態の分岐を行うようにします。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li>void Actor::HandleInput()</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;switch (m_state)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//立ち状態の場合。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;case STATE_STANDING:</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (IsPressButton(B))</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//上に移動させる。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_velocity.y = JUMP_VELOCITY;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプアニメーションを再生させる。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetAnimation(Jump);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ステートをジャンプに。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_state = STATE_JUMPING;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else if (IsPressButton(Down))</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//屈むアニメーションを再生する。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetAnimation(Duck);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ステートを屈みに。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_state = STATE_DUCKING;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//屈み状態の場合。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;case STATE_DUCKING:</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (IsReleaseButton(Down))</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//直立姿勢アニメーションを再生する。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetAnimation(Stand);</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ステートを立ちに。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_state = STATE_STANDING;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプ状態の場合。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;case STATE_JUMPING:</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//...</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>}</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  大した変化ではないかもしれませんが、以前のコードに比べて格段に進歩しました。
+                  複数のフラグを変更可能な1つの変数m_stateにまとめることができました。
+                </div>
+              </div>
+          </div>
+          <li id="2"><h2 class="margin-letter2">6.2 練習問題1</h2></li>
+          <div class="letter">
+            <div>
+              practice/State/Practice1/Game.slnからVisualStudioを立ち上げてください。
+              実行すると、このようになります。Fキーで攻撃、Spaceキーでジャンプです。
+              <div>
+                <img src="image/4/4.png" class="margin-letter">
+              </div>
+              <span class="strong-letter">Actorクラスを改造して、立ち・ジャンプ・攻撃をenum(列挙型)とswitch文での実装に変更してください。</span>
+              <ul>
+                <li>Answerに実装例がありますので、参考にしてください。</li>
+              </ul>
+            </div>
+          </div>
+        </ul>
+      </div>
+    </body>
+</html>
