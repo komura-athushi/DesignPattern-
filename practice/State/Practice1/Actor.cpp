@@ -19,7 +19,7 @@ bool Actor::Start()
 	//モデルレンダ―を初期化。
 	m_modelRender.Init("Assets/modelData/human/human.tkm", m_animationClips, enAnimationClip_Num);
 
-	m_charaCon.Init(20.0f, 100.0f, m_position+Vector3(0.0f,70.0f,0.0f));
+	m_charaCon.Init(20.0f, 100.0f, m_position+Vector3(0.0f,0.0f,0.0f));
 	return true;
 }
 
