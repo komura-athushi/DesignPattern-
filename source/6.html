@@ -184,7 +184,7 @@
                   この分かりにくいプログラムを改善するために、プレイヤーの状態を一旦整理してみましょう。
                 </div>
                 <div>
-                  <img src="image/4/3.png" class="margin-letter">
+                  <img src="image/5/1.png" class="margin-letter">
                 </div>
                 <div class="margin-letter">
                   これがFSM(有限状態機械)です。FSMの要点は以下の通りです。
@@ -277,7 +277,7 @@
               practice/State/Practice1/Game.slnからVisualStudioを立ち上げてください。
               実行すると、このようになります。Fキーで攻撃、Spaceキーでジャンプです。
               <div>
-                <img src="image/4/4.png" class="margin-letter">
+                <img src="image/5/1.png" class="margin-letter">
               </div>
               <span class="strong-letter">Actorクラスを改造して、立ち・ジャンプ・攻撃をenum(列挙型)とswitch文での実装に変更してください。</span>
               <ul>
@@ -506,6 +506,141 @@
                   <li>Answerに実装例がありますので、参考にしてください。</li>
                 </ul>
               </div>
+            </div>
+          </div>
+          <li id="5"><h2 class="margin-letter2">6.5 うますぎた話</h2></li>
+          <div class="letter">
+            <div>
+              ここまでFSMの良さを力説してきましたが、ここで一転して足元をすくわれることになります。FSMの最大の長所が最大の欠点でもあるのです。
+              <br>FSMは、扱いにくい問題に対して限定的な構造を強制することで、わかりやすくするのを助けます。
+              しかし、ゲームAIのような複雑なものにFSMを適用させようとすると、FSMの欠点に頭から突っ込むことになります。
+              ありがたいことに、私たちの先駆者が障害のいくつかをかわす方法をいくつもみつけています。そのうちのいくつかをざっと紹介したいと思います。
+              <ul>
+                <div class="margin-letter">
+                  <h5><li>平行状態機械</li></h5>
+                  プレイヤーが銃を携行できるようにしてみましょう。
+                  これまでの、「立っている」・「屈んでいる」・「ジャンプしている」状態に加え、「銃を持ちながら立っている」・「銃を持ちながら屈んでいる」・「銃を持ちながらジャンプをしている」状態を追加することになります。
+                  また、武器の種類を剣・刀・槍と増やそうとすると、「剣を持ちながら立っている」・「槍を持ちながら立っている」という風に組み合わせ的爆発を起こしてしまいます。
+                  <br>このような問題が起きてしまった原因としては、2つの状態(していること・持っている物)を単一の機械(状態)に混ぜ合わせてしまったことです。
+                  可能な組み合わせ全てを単一の状態としてしまっては、組み合わせの数が膨大となってしまいます。
+                  <br>修正方法は簡単です。2つの別の状態機械を保持するようにすればいいのです。
+                  <div class="margin-letter">
+                    <code>
+                      <ol class="code-region row coll-11">
+                      <li>class Actor</li>
+                      <li>{</li>
+                      <li>public:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//...</font></li>
+                      <li>private:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;ActorState*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_state;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//プレイヤーの状態。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;ActorState*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_equipment;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//プレイヤーの所持している武器。</font></li>
+                      <li>};</li>
+                      </ol></code>
+                  </div>
+                  <div class="margin-letter">
+                    プレイヤーが入力の処理をStateに委任する際には、両方のStateに委任させるようにします。
+                  </div>
+                  <div class="margin-letter">
+                    <code>
+                      <ol class="code-region row coll-11">
+                      <li>void Actor::HandleInput()</li>
+                      <li>{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;m_state-&gt;HandleInput(this);</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;m_equipment-&gt;HandleInput(this);</li>
+                      <li>}</li>
+                      </ol></code>
+                  </div>
+                  <div class="margin-letter">
+                    こうすれば、両方の状態がそれぞれ独立して入力に反応し、状態を遷移できます。
+                    両方の状態が無関係であれば、これでうまくいきます。
+                  </div>
+
+                </div>
+                <div class="margin-letter">
+                  <h5><li>階層的状態機械</li></h5>
+                    プレイヤーの振る舞いをどんどん肉付けしていくと、内容の似た状態が多くなってきます。
+                    どの状態でもBボタンでジャンプ、下ボタンで屈むなどです。これらの重複した部分の実装は一度だけにして、再利用できるようにした方がいいでしょう。
+                    <br>プレイヤーが「地上にいる」状態クラスを定義し、そこでジャンプと屈む状態に遷移する処理を実装します。
+                    「立っている」・「ジャンプ」・「走っている」クラスは、それを継承した上で追加の振る舞いを実装します。
+                    <br>これが、<span class="strong-letter">階層的状態機械</span>と呼ばれるものになります。
+                    それぞれの状態には親状態が存在し、子状態が入力を処理できなければ、それが親状態で受け渡されます。
+                    <br>まず、以下のように親状態に相当する基底クラスを定義します。
+                  <div class="margin-letter">
+                    <code>
+                      <ol class="code-region row coll-11">
+                      <li><font style="color:lightgreen;font-style:italic;">//地上にいる状態クラス。</font></li>
+                      <li>class OnGroundState : public ActorState</li>
+                      <li>{</li>
+                      <li>public:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;virtual ActorState* HandleInput(Actor* actor)</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Bボタンが押されたら。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (IsPressButton(B))</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプステートを返す。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new JumpingState();</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//下ボタンが押されたら。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else if (IsPressButton(Down))</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//屈みステートを返す。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new DuckingState();</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//...</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>};</li>
+                      </ol></code>
+                  </div>
+                  <div class="margin-letter">
+                      そして、それぞれの子状態がこれを継承します。
+                  </div>
+                  <div class="margin-letter">
+                    <code>
+                      <ol class="code-region row coll-11">
+                      <li><font style="color:lightgreen;font-style:italic;">//屈み状態クラス。</font></li>
+                      <li>class DuckingState : public OnGroundState</li>
+                      <li>{</li>
+                      <li>public:</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;virtual ActorState* HandleInput(Actor* actor)</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//下ボタンが離されたら。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (IsReleaseButton(Down))</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//立ち状態に戻す。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new StandingState();</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//入力が処理されなければ。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//階層を遡る(親状態の
+                        で実装されている処理を行う)。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return OnGroundState::HandleInput(actor);</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>};</li>
+                      </ol></code>
+                  </div>
+                </div>
+                <div class="margin-letter">
+                  <h5><li>プッシュダウン・オートマトン</li></h5>
+                  先ほど、プレイヤーの武装を実装しました。銃を撃つ際には、アニメーションであったり弾丸を飛ばすなどの処理が必要なので、FiringStateを実装しました。
+                  銃を撃つ際には、FiringStateに遷移するようにしました。
+                  <br>問題は、発砲が終わった後にプレイヤーが遷移する状態です。
+                  「立っている」・「走っている」状態にFiringStateに遷移して発砲が終われば、また「立っている」・「走っている」状態に遷移するようにしなければなりません。
+                  <br>しかし、これまで説明したFSMには、「履歴」という概念は存在しません。
+                  元の「立っている」・「走っている」状態に戻すには、「立っている時に発砲」・「ジャンプしている時に発砲」という新たな状態を定義しなければなりません。
+                  そうすれば、発砲が終了したときに、正しい状態に遷移することができます。
+                  <br>しかし、私たちが本当にやりたいことは、発砲をする前の状態を記録し、発砲が終われば再びその状態に遷移させることです。
+                  この問題には、「プッシュダウン・オートマトン」が役に立ちます。
+                  <br>プレイヤーには、Stateのスタックを持たせるようにします。
+                  新しいStateが生成されれば、そのStateをスタックにpushし新しい状態に遷移します。
+                  逆に、元のステートに遷移させる際には、現在のStateをスタックからpopし、新しくスタックトップとなったStateを現在のStateとします。
+                </div>
+                <div>
+                  <img src="image/5/3.png" class="margin-letter">
+                </div>
+              </ul>
+
             </div>
           </div>
         </ul>
