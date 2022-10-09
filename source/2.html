@@ -305,7 +305,7 @@
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ジャンプさせる。</font></li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vector3 destPosition = m_position;</li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;destPosition.y += 50.0f;</li>
-                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new Command(destPosition, this);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new MoveActorCommand(destPosition, this);</li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//右キーが押されたら。</font></li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;if (IsKeyDown(Right))</li>
@@ -313,7 +313,7 @@
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//右に移動させる。</font></li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vector3 destPosition = m_position;</li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;destPosition.x += 50.0f;</li>
-                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new Command(destPosition, this);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new MoveActorCommand(destPosition, this);</li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//左キーが押されたら。</font></li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;if (IsKeyDown(Left))</li>
@@ -321,7 +321,7 @@
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//左に移動させる。</font></li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vector3 destPosition = m_position;</li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;destPosition.x -= 50.0f;</li>
-                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new Command(destPosition, this);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return new MoveActorCommand(destPosition, this);</li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;return nullptr;</li>
                   <li></li>

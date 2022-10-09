@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>デザインパターン2 第七章</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/template.css">
+    <script src="../js/template.js"></script>
+  </head>
+
+    <body>
+      
+      <div id="box">
+      </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+      </script>
+      <script>
+        jQuery(function(){
+          $('#box').load('html/header.html') // #headerにheader.htmlを読み込む
+        });
+      </script>
+      <div class="title">
+        <h1>第七章 DoubleBufferパターン</h1>
+      </div>
+      <div class="letter-body">
+        <ul id="list1">
+          <li id="1"><h2 class="margin-letter2">7.1 DoubleBufferパターン誕生の背景</h2></li>
+          <div class="letter">
+            <div>
+              DoubleBufferパターンの概要の前に、DoubleBufferパターン誕生の背景について説明します。
+              <div class="margin-letter">
+                コンピュータは逐次(順序ごとに)処理を行うものです。しかし、時にユーザーはコンピュータに複数の処理が同時に行われるようにすることを要求します。
+                <br>その最たる例が、ゲームにとって重要なレンダリングです。
+                コンピュータは、オブジェクト一つ一つを順に描いていきます。しかし、そのように順番に描かれていく様子をユーザーに見せるわけにはいけません。
+                <span class="strong-letter">完成されたフレームが、次々と瞬時に表示される必要</span>があります。
+                <br><a href="https://nn-hokuson.hatenablog.com/entry/2014/01/15/164232">【OpenGLでゲームを作る】ダブルバッファリングとは</a>
+                <br>DoubleBufferパターンは、このような問題を解決する手段になります。例え話で解説しましょう。
+              </div>
+              <div class="margin-letter">
+                ユーザーが演劇を見ていて、私たちがその演出をしているとしましょう。第1場(ば)が終わり第2場が始まります。
+                その時に、舞台装置の変更が必要です。大道具と小道具を運び出さなければなりません。
+                しかし、ユーザーがそのような光景を目にしてしまうと、幻想の空間は破壊されてしまうことでしょう。
+                場面の転換に時間がかかっては困るのです。
+                <br>場所さえあれば、賢い解決策があります。それは、<span class="strong-letter">第1場と第2場でそれぞれ別の舞台(舞台Aと舞台Bとしましょう)を用意</span>することです。
+                第1場が終了したと同時に、予め用意をしておいた舞台Bに切り替えれば、ユーザーは間を開けずに第2場を楽しむことができます。
+              </div>
+              <div class="margin-letter">
+                この演劇の例が正にDoubleBufferパターンの仕組みと同じで、<span class="strong-letter">私たちが普段目にするほぼ全てのゲームのレンダリングシステムがこの方式を採用</span>しています。
+                <br>フレームバッファを2つ用意します。1つが前述した舞台Aで、現在ディスプレイに表示しているものです。もう1つが舞台Bにあたるもので、もう一方を表示している間にレンダリングを行います。
+                レンダリングが完了したら、ディスプレイに表示するフレームバッファを切り替えます。このようにすることで、レンダリング途中の画面がディスプレイに表示されることはなく、一瞬で画面を切り替えることができます。
+                DirectXでは、スワップチェーンという機能がこれに当たります。
+              </div>
+            </div>
+          </div>
+          <li id="2"><h2 class="margin-letter2">7.2 DoubleBufferパターン</h2></li>
+          <div class="letter">
+            <div>
+              DoubleBufferパターンは、<span class="strong-letter">逐次処理される作業を一瞬または同時に作業しているように見せるパターン</span>です。
+              <br>DoubleBufferを使用するクラスはバッファをクラス化し、外部からはバッファが単一の存在であるかのように見せます。
+              実際は、クラスのインスタンスが2つ必要です。つまり、「次」と「現在」用のバッファです。
+              バッファを読み込む場合は、「現在」のバッファを読み込みます。バッファに書き込む場合は、「次」のバッファに書き込みます。
+              <br>変更が完了すると、「現在」と「次」のバッファを入れ替え、「次」のバッファを「現在」のバッファとして外部から見えるようにします。
+              また、「現在」のバッファは「次」のバッファとなります。
+              <div class="margin-letter">
+                DoubleBufferパターンの理屈は分かりましたので、実際のコードを見ていきましょう。
+                フレームバッファにピクセルを描画するする最小限のグラフィックスシステムを考えます。
+              </div>
+              <div class="margin-letter">
+                まず、何はともあれバッファ自体を作成しましょう。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//フレームバッファ</font></li>
+                  <li>class FrameBuffer</li>
+                  <li>{</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//バッファのサイズ。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;static const int WIDTH = 1080;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;static const int HEIGHT = 720;</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//バッファ全体をデフォルト色でクリア。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Clear()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; WIDTH; i++)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (int j = 0; j &lt; HEIGHT; j++)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_pixels[i][j] = Color::White;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//指定した箇所のピクセルを特定の色にする。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Draw(int x, int y,Color color)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_pixels[x][y] = color;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//指定箇所の色を取得。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;const Color&amp; GetPIxels(int x, int y)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return m_pixels[x][y];</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Color m_pixels[WIDTH][HEIGHT];</li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                続いて、FrameBufferをラッパーしたSceneクラスを実装します。
+                Sceneクラスは、FrameBufferのDraw関数を呼び出してバッファへの描画を行っていきます。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//フレームバッファをラッパーしたクラス。</font></li>
+                  <li>class Scene</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Draw()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレームバッファをクリアする。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer.Clear();</li>
+                  <li></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレームバッファにドローしていく。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer.Draw(1, 1, Color::Black);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer.Draw(10, 100, Color::Yellow);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer.Draw(10, 500, Color::Red);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレームバッファを取得。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;FrameBuffer* GetBuffer()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return &amp;m_frameBuffer;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;FrameBuffer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレームバッファ。</font></li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                フレーム更新のたびに、ゲームエンジンがSceneクラスに描画を命令します。
+                Sceneはバッファをクリアしてピクセルを1つずつ描画していきます。
+                また、GPUからバッファが読み込めるようにGetBuffer()という関数を実装しています。
+                <br>一見問題はないように思えますが、このままでは問題が生じます。
+                問題は、GPUがどの時点でもGetBuffer()を呼び出せてしまうことです。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>void Draw()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレームバッファをクリアする。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer.Clear();</li>
+                  <li></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレームバッファにドローしていく。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer.Draw(1, 1, Color::Black);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//この時点で、GPUがバッファの読み込みをしてしまうかもしれない！</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer.Draw(10, 100, Color::Yellow);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer.Draw(10, 500, Color::Red);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                フレームバッファにピクセルを描画している間に、GPUがバッファの読み込みをしてしまうかもしれません。
+                そうなれば、ひどくチラついた画面がディスプレイに表示されることでしょう。
+                DoubleBufferパターンで、この問題を解決しましょう。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//フレームバッファをラッパーしたクラス。</font></li>
+                  <li>class Scene</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Scene() : m_currentFrameBuffer(&amp;m_frameBuffers[0]),m_nextFrameBuffer(&amp;m_frameBuffers[1])</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Draw()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//次のフレームバッファに対する、書き込みを行っていく。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレームバッファをクリアする。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_nextFrameBuffer.Clear();</li>
+                  <li></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレームバッファにドローしていく。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_nextFrameBuffer.Draw(1, 1, Color::Black);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_nextFrameBuffer.Draw(10, 100, Color::Yellow);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_nextFrameBuffer.Draw(10, 500, Color::Red);</li>
+                  <li></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//現在と次のフレームバッファを入れ替える。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Swap();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//現在のフレームバッファを取得。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;FrameBuffer* GetBuffer()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return m_currentFrameBuffer;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//現在と次のフレームバッファを入れ替える。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">void Swap()</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">{</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">FrameBuffer* temp = m_currentFrameBuffer;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">m_currentFrameBuffer = m_nextFrameBuffer;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">m_nextFrameBuffer = temp;</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">}</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">FrameBuffer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffers[2];&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレームバッファ。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">FrameBuffer*&nbsp;&nbsp;&nbsp;&nbsp;m_currentFrameBuffer;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//現在のフレームバッファ。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">FrameBuffer*&nbsp;&nbsp;&nbsp;&nbsp;m_nextFrameBuffer;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//次のフレームバッファ。</span></font></li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                新版のSceneクラスにはFrameBufferが2つあり、配列m_frameBuffersに保持されています。
+                配列の要素を直指定するのではなく、各々要素を参照するm_currentFrameBuffer(現在のFrameBuffer)とm_nextFrameBuffer(次のFrameBuffer)というメンバ変数でしています。
+                描画の際には、m_nextFrameBufferで参照されるフレームバッファに書き込みを行います。
+                GPUがFrameBufferの情報を必要とした際には、m_currentFrameBufferの参照する要素を返すようにします。
+
+                <br>このようにすれば、GPUが書きかけのFrameBufferにアクセスすることはありません、
+                またSwap関数により、m_currentFrameBufferとm_nextFrameBufferの参照する要素を入れ替えるようにします。
+                これでディスプレイにチラついた画面が映ることはなくなりました。
+              </div>
+            </div>
+          </div>
+          <li id="3"><h2 class="margin-letter2">7.3 パターン使用上の注意点</h2></li>
+          <div class="letter">
+            <div>
+                DoubleBufferパターンの使用例が分かったところで、パターン使用時の注意点に見ていきましょう。
+                <ul>
+                  <div class="margin-letter">
+                    <h5><li>入れ替え操作にかかる時間</li></h5>
+                    DoubleBufferパターンでは、バッファの入れ替え操作が必要になります。
+                    この操作は分割不可で、入れ替え操作中は外部からバッファにアクセスすることができません。
+                    状態の変更より入れ替え操作時間のほうが長いようでは、問題です。
+                  </div>
+                  <div class="margin-letter">
+                    <h5><li>バッファが2つ必要</li></h5>
+                    DoubleBufferパターンを使用すると、メモリの使用量が増えることにも注意が必要です。
+                    バッファを常に2つ保持していることになりますので、必然的にメモリの使用量が増えます。
+                    メモリ制限の厳しい機種では、気を付けなければなりません。
+                  </div>
+                </ul>
+                <div class="margin-letter">
+                  これら2つの点に関しては、DoubleBufferパターンを使用する際は気を付けなければなりません。
+                  <br>また、このパターンを使用する場面は以下の通りです。
+                  <div class="margin-letter">
+                    <ol>
+                      <h5><li>徐々に変更される状態が存在する。</li></h5>
+                      <h5><li>その状態は変更中に読み込まれる可能性がある。</li></h5>
+                      <h5><li>状態が変更中であることを、外部から分からせたくない。</li></h5>
+                    </ol>
+                  </div>
+                  レンダリングだけでなく、このような場面に遭遇した場合はDoubleBufferパターンが効果的です。
+                  というわけで、レンダリング以外のDoubleBufferパターンの活用例を見ていきましょう。
+                </div>
+              </div>
+          </div>
+          <li id="4"><h2 class="margin-letter2">7.4 演劇</h2></li>
+          <div class="letter">
+            <div>
+              ドタバタ喜劇をベースとしたゲーム用の処理システムを実装しているとしましょう。
+              ゲームでは舞台上で何人かの役者が走り回ったり、おふざけをしたりします。
+              役者を表す、Actorクラスを定義しましょう。<span class="strong-letter">このActorクラスは、他のActorから叩かれると別のActorを叩く</span>ようにします。
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//役者を表すクラス。</font></li>
+                  <li>class Actor</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//コンストラクタ。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Actor(std::string name, bool isSlapped) :m_name(name), m_isSlapped(isSlapped) {}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//舞台を表すStageクラスから、毎フレーム呼ばれる処理。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Update()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩かれていなければ。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (m_isSlapped == false)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩かれているなら。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//相手をたたく。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Slap();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩かれたフラグをfalseに。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_isSlapped = false;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩く相手を設定する。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void SetFace(Actor* facing)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_facing = facing;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//指定した相手をたたく。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Slap()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_facing-&gt;Slapped();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩かれる。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Slapped()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_isSlapped = true;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;std::string m_name;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Actorの名前。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Actor* m_facing = nullptr;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩く相手。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;bool m_isSlapped = false;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩かれたらtrue、別のActorを叩いたらfalseにする。</font></li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                続いて、役者達が作用しあう舞台を作りましょう。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//役者が作用しあう舞台。</font></li>
+                  <li>class Stage</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Stage() {}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//それぞれActorの関数を呼び出す。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Update()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (auto&amp; actor : m_actorList)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actor-&gt;Update();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Actorをステージに追加。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void AddActor(Actor* actor)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_actorList.push_back(actor);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;std::vector&lt;Actor*&gt; m_actorList;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Actorの配列。</font></li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                では、実際にActorを配置して舞台がどうなるか見ていきましょう。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>int main()</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//役者を配置するステージ。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Stage stage;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//役者を生成。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Actor* harry = new Actor(<font style="color:lightcoral;">"ハリー"</font>, true);    <font style="color:lightgreen;font-style:italic;">//ハリーは最初から叩かれていることにする。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Actor* baldy = new Actor(<font style="color:lightcoral;">"ボールディ"</font>, false);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Actor* chump = new Actor(<font style="color:lightcoral;">"チャンプ"</font>, false);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//それぞれの役者が叩く相手を設定。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;harry-&gt;SetFace(baldy);      <font style="color:lightgreen;font-style:italic;">//ハリーはボールディを叩く。  </font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;baldy-&gt;SetFace(chump);      <font style="color:lightgreen;font-style:italic;">//ボールディはチャンプを叩く。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;chump-&gt;SetFace(harry);      <font style="color:lightgreen;font-style:italic;">//チャンプはハリーを叩く。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ステージに役者を追加。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;stage.AddActor(harry);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;stage.AddActor(baldy);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;stage.AddActor(chump);</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;while (true)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//舞台の更新を行う。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stage.Update();</li>
+                  <li></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                実行した結果、以下のようになりました。
+              </div>
+              <div>
+                <img src="image/6/1.png" class="margin-letter">
+              </div>
+              <div class="margin-letter">
+                図に表すと、こうなります。
+              </div>
+              <div>
+                <img src="image/6/2.png" class="margin-letter">
+              </div>
+              <div class="margin-letter">
+                最初にハリーを叩いたのが、1フレームで全員に広がりました。
+                では、役者の順序を変えて配置してみましょう。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//ステージにアクターを追加。</font></li>
+                  <li>stage.AddActor(chump);</li>
+                  <li>stage.AddActor(baldy);</li>
+                  <li>stage.AddActor(harry);</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                実行結果は以下の通りです。
+              </div>
+              <div>
+                <img src="image/6/3.png" class="margin-letter">
+              </div>  
+              <div class="margin-letter">
+                結果が全く違います！
+                <br>問題としては、<span class="strong-letter">役者が叩かれたことに反応するのが現在のフレームか次のフレームになるのかが役者の
+                更新順番によって決定してしまう</span>ことです。
+                これでは、「役者が同時に動いているように見せる」ということに反しています。
+                <br>ではDoubleBufferパターンを用いて、<span class="strong-letter">役者の更新順番に関係なく役者が叩かれたことに反応するのが次のフレーム</span>になるようにしてみましょう。
+                Actorクラスの叩かれたフラグを、現在と次の2つを用意するようにします。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;std::string m_name;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Actor* m_facing = nullptr;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">bool m_isCurrentSlapped = false;</span>      <font style="color:lightgreen;font-style:italic;">//現在の叩かれたフラグ。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">bool m_isNextSlapped = false;</span>          <font style="color:lightgreen;font-style:italic;">//次の叩かれたフラグ。</font></li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                そして、フラグの読み込みには現在のフラグを、書き込みには次のフラグを使用するようにします。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>void Update() </li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩かれていなければ。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//現在のフラグを読み込む。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;if (<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">m_isCurrentSlapped</span> == false)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩かれているなら。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//相手をたたく。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Slap();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩かれたフラグをfalseに。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//次のフラグを使用する。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">m_isNextSlapped</span> = false;</li>
+                  <li>}</li>
+                  <li><font style="color:lightgreen;font-style:italic;">//....</font></li>
+                  <li><font style="color:lightgreen;font-style:italic;">//叩かれる。</font></li>
+                  <li>void Slapped()</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩かれたフラグをtrueに。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//次のフラグを使用する。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">m_isNextSlapped</span> = true;</li>
+                  <li>}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                また、役者の更新処理が終わればフラグの入れ替えが行えるように、新たにSwap関数を実装します。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//現在と次のフラグを入れ替える。</font></li>
+                  <li>void Swap()</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//現在と次の叩かれたフラグを入れ替える。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;bool hoge = m_isCurrentSlapped;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;m_isCurrentSlapped = m_isNextSlapped;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;m_isNextSlapped = m_isCurrentSlapped;</li>
+                  <li>}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                後は、StageでSwap関数を呼ぶようにしましょう。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;for (auto&amp; actor : m_actorList)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;actor-&gt;Update();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">for (auto&amp; actor : m_actorList)</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">{</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//叩かれたフラグを入れ替える。</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">actor-&gt;Swap();</span></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;">}</span></li>
+                  <li>}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                実行してると、以下のような結果になりました。
+                <br>役者が叩かれたことに反応するのが、次のフレームで固定になりました。
+              </div>
+              <div class="margin-letter">
+                
+              </div>
+            </div>
+          </div>
+        </ul>
+    </div>
+</body>
+</html>
