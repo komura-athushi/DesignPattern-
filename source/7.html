@@ -141,9 +141,9 @@
               <div class="margin-letter">
                 フレーム更新のたびに、ゲームエンジンがSceneクラスに描画を命令します。
                 Sceneはバッファをクリアしてピクセルを1つずつ描画していきます。
-                また、GPUからバッファが読み込めるようにGetBuffer()という関数を実装しています。
+                また、グラフィックスドライバからバッファが読み込めるようにGetBuffer()という関数を実装しています。
                 <br>一見問題はないように思えますが、このままでは問題が生じます。
-                問題は、GPUがどの時点でもGetBuffer()を呼び出せてしまうことです。
+                問題は、グラフィックスドライバがどの時点でもGetBuffer()を呼び出せてしまうことです。
               </div>
               <div class="margin-letter">
                 <code>
@@ -155,14 +155,14 @@
                   <li></li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレームバッファにドローしていく。</font></li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer.Draw(1, 1, Color::Black);</li>
-                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//この時点で、GPUがバッファの読み込みをしてしまうかもしれない！</span></font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red;border-bottom:solid 1px red;font-weight:bold;"><font style="color:lightgreen;font-style:italic;">//この時点で、グラフィックスドライバがバッファの読み込みをしてしまうかもしれない！</span></font></li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer.Draw(10, 100, Color::Yellow);</li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_frameBuffer.Draw(10, 500, Color::Red);</li>
                   <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
                   </ol></code>
               </div>
               <div class="margin-letter">
-                フレームバッファにピクセルを描画している間に、GPUがバッファの読み込みをしてしまうかもしれません。
+                フレームバッファにピクセルを描画している間に、グラフィックスドライバがバッファの読み込みをしてしまうかもしれません。
                 そうなれば、ひどくチラついた画面がディスプレイに表示されることでしょう。
                 DoubleBufferパターンで、この問題を解決しましょう。
               </div>
@@ -212,9 +212,9 @@
                 新版のSceneクラスにはFrameBufferが2つあり、配列m_frameBuffersに保持されています。
                 配列の要素を直指定するのではなく、各々要素を参照するm_currentFrameBuffer(現在のFrameBuffer)とm_nextFrameBuffer(次のFrameBuffer)というメンバ変数でしています。
                 描画の際には、m_nextFrameBufferで参照されるフレームバッファに書き込みを行います。
-                GPUがFrameBufferの情報を必要とした際には、m_currentFrameBufferの参照する要素を返すようにします。
+                グラフィックスドライバがFrameBufferの情報を必要とした際には、m_currentFrameBufferの参照する要素を返すようにします。
 
-                <br>このようにすれば、GPUが書きかけのFrameBufferにアクセスすることはありません、
+                <br>このようにすれば、グラフィックスドライバが書きかけのFrameBufferにアクセスすることはありません、
                 またSwap関数により、m_currentFrameBufferとm_nextFrameBufferの参照する要素を入れ替えるようにします。
                 これでディスプレイにチラついた画面が映ることはなくなりました。
               </div>
@@ -485,8 +485,106 @@
                 実行してると、以下のような結果になりました。
                 <br>役者が叩かれたことに反応するのが、次のフレームで固定になりました。
               </div>
+              <div>
+                <img src="image/6/4.png" class="margin-letter">
+              </div>
+            </div>
+          </div>
+          <li id="5"><h2 class="margin-letter2">7.5 検討項目</h2></li>
+          <div class="letter">
+            <div>
+              DoubleBufferパターン仕組みは非常に単純ですが、幾つかパターン使用に当たり検討すべき項目があります。
+              <ul>
+                <div class="margin-letter">
+                  <h5><li>バッファの入れ替え方法</li></h5>
+                  <ul>
+                    <li><span class="strong-letter2">バッファへのポインタや参照を入れ替える</span></li>
+                  
+                  グラフィックスの例ではこの方法を用いました。グラフィックスでDoubleBufferを採用する場合、最も採用される方法です。
+                  <br>この方法は、バッファの大きさに関わらず一定の速度で実行されます。<span class="strong-letter">速度と単純さの点でこれに勝る方法はありません。</span>
+                  <br>しかし、この方法にも欠点が存在します。それは、<span class="strong-letter">外部に対してバッファを参照する固定したポインタを保持させることができない</span>ことです。
+                  この方法では、データを動かさず外部のコードに対して見せるバッファを定期的に変えているだけです。なので、外部に対してバッファを固定で参照するポインタを持たせることはできません。
+                  <br>この欠点は、グラフィックスドライバが固定アドレスにしか対応してない時に障害になります。
+                  この場合は、バッファの入れ替えにポインタの入れ替えを使用するという方法は使えません。
+                  <br>また、もう1つ注意したいことがあります。
+                  それは、<span class="strong-letter">バッファ内のデータは2フレーム前のデータで直前のフレームのものではないという点</span>です。
+                  以下は、描画の流れになります。
+                  <div>
+                    <img src="image/6/5.png" class="margin-letter">
+                  </div>
+                  この時、3フレーム目のバッファAのデータは、2フレーム前の1フレーム目のデータが格納されています。
+                  バッファ内のデータを再利用したいと思う場合は、バッファ内のデータが2フレーム前のデータあるということを計算に入れておきましょう。
+                  <li><span class="strong-letter2">バッファ間でデータをコピーする</span></li>
+                  外部ユーザーからの参照先を変更できないのであれば、バッファ間のデータをコピーするしかありません。
+                  7.4 演劇では、この方法を使用しました。bool値1つをコピーしているだけなので、ポインタを入れ替える方法と所要時間は変わりません。
+                  <br>この方法の優れている点は、<span class="strong-letter">各バッファは直前のフレームのデータを保持しているという点</span>です。
+                  バッファのデータを使用したい場合、この方法の方がより最新のデータを使用することができます。
+                  <br>しかし、バッファの保持するデータが大きい場合は、バッファの入れ替えに時間がかかることに注意しましょう。
+                  バッファの入れ替えをしている間は、バッファへの書き込み及び読み込みができなくなるので、これは大きな制限となります。
+                  </ul>
+                </div>
+                <div class="margin-letter">
+                  <h5><li>バッファの粘度</li></h5>
+                  <ul>
+                    もう一つの問題が、バッファの形状(単一のデータの塊か、様々なオブジェクトに散らばっているか)です(粘度とは大きさの事です)。
+                    前者が7.2のグラフィックスの例で、後者が7.4の演劇の例です。
+                    <li><span class="strong-letter2">バッファが単一の場合</span></li>
+                    入れ替えは簡単です。バッファが1つしか存在しませんから、1回の交換で入れ替えが完了します。
+                    <li><span class="strong-letter2">バッファが多くのオブジェクトに分かれている場合</span></li>
+                    入れ替えに時間がかかります。交換を行うには、オブジェクト1つ1つのバッファを入れ替える作業が必要になります。
+                    7.4の演劇の例では、Actorの配列からActorを1つずつ指定してバッファの入れ替えを行っていました。
+                    <br>グラフィックスの例のように、毎フレームバッファをクリアしたりするような古い値を変更する処理が必要ないのであれば、良い方法があります。
+                    考え方としては、バッファを配列にしポインタで「現在」と「次」を入れ替えたように、オフセットでバッファを切り替えるようにします。
+                    <div class="margin-letter">
+                      <code>
+                        <ol class="code-region row coll-11">
+                        <li>class Actor</li>
+                        <li>{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//初期化。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;static void Init() { m_current = 0; }</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//バッファを入れ替える。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;static void Swap()</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_current = Next();</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩かれた！</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;void Slap()</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_wasSlapped[Next()] = true;</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//叩かれたらtrue。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;bool WasSlapped()</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return m_wasSlapped[m_current];</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                        <li>private:</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;static int m_current;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//現在のバッファのオフセット。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;static int Next() { return 1 - m_current; }&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//次のバッファのオフセットを返す。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;bool m_wasSlapped[2];&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//バッファ。</font></li>
+                        <li>};</li>
+                        </ol></code>
+                    </div>
+                    Swap関数をstaticにしていることに注目してください。このstatic関数を1回呼ぶだけで、全てのActorのバッファを入れ替えることができるのです。
+                    </ul>
+                </div>
+              </ul>
+            </div>
+          </div>
+          <li id="6"><h2 class="margin-letter2">7.6 練習問題1</h2></li>
+            <div class="letter">
+              <div>
+              practice/DoubleBuffer/Practice1/Game.slnからVisualStudioを立ち上げてください。
+              7.4 演劇の例のように、ステージ上に役者が複数人存在し、役者は叩かれると別の役者を叩くようになっています。
+              <div>
+                <img src="image/6/3.png" class="margin-letter">
+              </div>
               <div class="margin-letter">
-                
+                <span class="strong-letter">役者が叩かれた際に反応するのが現在のフレームか次のフレームかが役者の更新順番に依存しているので、
+                叩かれたことに反応するのが次のフレームで固定になるようにしてください。</span>
+                <ul>
+                  <li>7.4 演劇の項目を参考にしてください。</li>
+                  <li>Answerに実装例がありますので、参考にしてください。</li>
+                </ul>
               </div>
             </div>
           </div>

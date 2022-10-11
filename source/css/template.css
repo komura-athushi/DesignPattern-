@@ -53,6 +53,10 @@ html {
     border-bottom: 2px solid #0059b3;
 }
 
+.strong-letter2{
+    font-weight: bold;
+}
+
 .letter-body{
     margin-top: 5%;
     margin-left: 3%;

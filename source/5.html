@@ -163,8 +163,28 @@
                 <br><img src="image/4/2.png" class="margin-letter">
               </div>
               <div class="margin-letter">
+                また、Gameクラスでソリューション構成を表すクラスを、ソリューション構成に合わせて生成しています。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>bool Game::Start()</li>
+                  <li>{</li>
+                  <li>#ifdef _DEBUG</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;m_configuration = new DebugConfiguration();</li>
+                  <li>#endif</li>
+                  <li>#ifdef _RELEASE</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;m_configuration = new ReleaseConfiguration();</li>
+                  <li>#endif</li>
+                  <li></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;m_fontRender.SetText(m_configuration-&gt;GetSolutionConfiguration().c_str());</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;return true;</li>
+                  <li>}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
                 <span class="strong-letter">ソリューション構成を表すConfigurationクラスを、Singletonパターンで実装してください。
-                <br>ソリューション構成に応じてのインスタンス生成を、Configurationクラスの静的メンバ関数で行うようにしてください。</span>
+                <br>Gameクラスで実装しているこれらのインスタンス生成を、Configurationクラス内で行うようにしてください。</span>
                 <ul>
                   <li>Answerに実装例がありますので、参考にしてください。</li>
                 </ul>
