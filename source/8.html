@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>デザインパターン2 第八章</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/template.css">
+    <script src="../js/template.js"></script>
+  </head>
+
+    <body>
+      
+      <div id="box">
+      </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+      </script>
+      <script>
+        jQuery(function(){
+          $('#box').load('html/header.html') // #headerにheader.htmlを読み込む
+        });
+      </script>
+      <div class="title">
+        <h1>第八章 GameLoopパターン</h1>
+      </div>
+      <div class="letter-body">
+        <ul id="list1">
+          <li id="1"><h2 class="margin-letter2">8.1 GameLoopパターン誕生の背景</h2></li>
+          <div class="letter">
+            <div>
+                この教材の中で紹介しているパターンの中で、最もゲーム開発において欠かせないパターンを1つ挙げろと言われれば、
+                このパターンを挙げます。
+                それだけ、GameLoopパターンはゲーム開発において重要なパターンとなります。
+                <div class="margin-letter"> 
+                    今のようなゲーム(入力が無くても常時実行される)の前には、対話型のゲームが存在していました。
+                    ユーザーの入力に応じて、ゲームが進行するというものです。
+                </div>
+                <div class="margin-letter">
+                    <code>
+                        <ol class="code-region row coll-11">
+                        <li>文字に囲まれた道は小さな煉瓦造りの建物に突き当たる。その建物から、水が側溝に流れ出ている。</li>
+                        <li><font style="color:lightgreen;font-style:italic;">//ユーザーの入力</font></li>
+                        <li>&gt; GO IN</li>
+                        <li>あなたは建物の中にいる。大きな泉の上に建てられた井戸小屋だ。</li>
+                        </ol></code>
+                </div>
+                <div class="margin-letter">
+                    このようなゲームでは、「対話」が可能でした。
+                    ユーザーの入力を待って、プログラムがそれに反応します。
+                    つまり、ユーザーから何らかの入力がされるまで、プログラムは何もせずただじっと待っているだけでした。
+                </div>
+                <div class="margin-letter">
+                    
+                </div>
+            </div>
+          </div>
+        </ul>
+      </div>
+    </body>
+</html>

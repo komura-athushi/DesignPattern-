@@ -80,45 +80,7 @@ void Actor::Update()
 	m_modelRender.Update();
 }
 
-//地上にいる状態クラス。
-class OnGroundState : public ActorState
+void Actor::Render(RenderContext& rc)
 {
-public:
-	virtual ActorState* HandleInput(Actor* actor)
-	{
-		//Bボタンが押されたら。
-		if (IsPressButton(B))
-		{
-			//ジャンプステートを返す。
-			return new JumpingState();
-		}
-		//下ボタンが押されたら。
-		else if (IsPressButton(Down))
-		{
-			//屈みステートを返す。
-			return new DuckingState();
-		}
-		//...
-	}
-};
-
-//屈み状態クラス。
-class DuckingState : public OnGroundState
-{
-public:
-	virtual ActorState* HandleInput(Actor* actor)
-	{
-		//下ボタンが押されたら。
-		if (IsPressButton(Down))
-		{
-			//立ち状態に戻す。
-			return new StandingState();
-		}
-		//入力が処理されなければ。
-		else
-		{
-			//階層を遡る(親状態の処理を行う)。
-			return OnGroundState::HandleInput(actor);
-		}
-	}
-};
+	m_modelRender.Draw(rc);
+}
