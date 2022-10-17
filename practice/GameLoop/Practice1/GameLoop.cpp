@@ -10,7 +10,7 @@ void GameLoop::Loop()
 	//描画処理。
 	Render();
 
-	//現時点の経過時間を取得(単位:秒)。
+	//現時点で、プログラム実行時からの経過時間を取得(単位:秒)。
 	float currentTime = CurrentTime();
 	//設定した時間だけプログラムを停止(単位:秒)
 	Stop(0.01f);
