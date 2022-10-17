@@ -207,7 +207,22 @@ namespace nsK2EngineLow {
 			m_frameRateInfo.frameRateMode = frameRateMode;
 			m_frameRateInfo.maxFPS = maxFPS;
 		}
-		
+		/// <summary>
+		/// FPSの上限を設定。
+		/// </summary>
+		/// <param name="maxFPS"></param>
+		void SetMaxFPS(const int maxFPS)
+		{
+			m_fpsLimitter.SetMaxFPS(maxFPS);
+		}
+		void SetIsLimittedFPS(bool isLimittedFPS)
+		{
+			m_isLimittedFPS = isLimittedFPS;
+		}
+		void SetIsShowFPS(bool isShowFPS)
+		{
+			m_isShowFPS = isShowFPS;
+		}
 	private:
 #ifdef K2_DEBUG
 		std::unique_ptr<Font> m_fpsFont;
@@ -224,6 +239,8 @@ namespace nsK2EngineLow {
 		GameTime m_gameTime;
 		FPSLimitter m_fpsLimitter;						// FPSに制限をかける処理。
 		FrameRateInfo m_frameRateInfo = { enFrameRateMode_Variable , 60};
+		bool			m_isLimittedFPS = false;
+		bool			m_isShowFPS = true;
 	};
 
 	extern K2EngineLow* g_engine;	// 低レベルK2エンジン。

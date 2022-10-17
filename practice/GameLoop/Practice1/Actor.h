@@ -1,5 +1,8 @@
 #pragma once
-class Actor : public IGameObject
+
+#include "Command.h"
+
+class Actor: public IGameObject
 {
 public:
 	Actor(){}
@@ -7,26 +10,25 @@ public:
 	bool Start();
 	void Update();
 	void Render(RenderContext& rc);
-private:
-	//アニメーション。
-	enum EnAnimationClip {
-		enAnimationClip_Idle,				//待機アニメーション。	
-		enAnimationClip_Attack,				//攻撃アニメーション。
-		enAnimationClip_Jump,				//ジャンプアニメーション。
-		enAnimationClip_Num,				//アニメーションの数。
-	};
-	enum State
+public:
+	const Vector3 GetPosition() const
 	{
-		State_Idle,							//待機ステート。
-		State_Attack,						//攻撃ステート。
-		State_Jump,							//ジャンプステート。
-		State_Num,							//ステートの数。
-	};
-	AnimationClip			m_animationClips[enAnimationClip_Num];		//アニメーションクリップ。
-	ModelRender				m_modelRender;
-	Vector3					m_position;
-	CharacterController		m_charaCon;
-	Vector3					m_velocity = Vector3::Zero;
-	State					m_state = State_Idle;
+		return m_position;
+	}
+	void SetPosition(const Vector3& position)
+	{
+		m_position = position;
+	}
+private:
+	std::unique_ptr<Command> HandleInput();
+	void UndoAndCancel();
+	void DeleteCommand();
+private:
+	SpriteRender m_spriteRender;
+	Vector3 m_startPosition;
+	Vector3 m_position;
+	std::vector<std::unique_ptr<Command>> m_commandVector;
+	int m_commandIndex = 0;
+	FontRender m_fontRender;
 };
 

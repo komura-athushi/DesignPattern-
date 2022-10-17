@@ -1,7 +1,8 @@
 #pragma once
 
+#include "Actor.h"
+
 class Actor;
-class Background;
 
 class Game : public IGameObject
 {
@@ -11,8 +12,8 @@ public:
 	bool Start();
 	void Update();
 	void Render(RenderContext& rc);
+
 private:
 	Actor* m_actor = nullptr;
-	Background* m_background = nullptr;
 };
 

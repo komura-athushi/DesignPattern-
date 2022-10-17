@@ -1,86 +1,87 @@
 #include "stdafx.h"
 #include "Actor.h"
 
-namespace
-{
-	const float JUMP_VELOCITY = 100.0f;
-	const float GRAVITY_VELOCITY = 2.98f;
-}
-
 bool Actor::Start()
 {
-	//アニメーションをロードする。
-	m_animationClips[enAnimationClip_Idle].Load("Assets/animData/human/idle.tka");
-	m_animationClips[enAnimationClip_Idle].SetLoopFlag(true);
-	m_animationClips[enAnimationClip_Attack].Load("Assets/animData/human/attack.tka");
-	m_animationClips[enAnimationClip_Attack].SetLoopFlag(false);
-	m_animationClips[enAnimationClip_Jump].Load("Assets/animData/human/jump.tka");
-	m_animationClips[enAnimationClip_Jump].SetLoopFlag(false);
-	//モデルレンダ―を初期化。
-	m_modelRender.Init("Assets/modelData/human/human.tkm", m_animationClips, enAnimationClip_Num);
-
-	m_charaCon.Init(20.0f, 100.0f, m_position+Vector3(0.0f,0.0f,0.0f));
+	m_spriteRender.Init("Assets/sprite/actor.dds",200,200);
+	m_spriteRender.SetPosition(m_startPosition);
+	m_position = m_startPosition;
+	m_commandVector.push_back(std::make_unique<MoveActorCommand>(m_position, this));
 	return true;
 }
 
 void Actor::Update()
 {
-	switch (m_state)
+	auto newCommand = std::move(HandleInput());
+	if (newCommand)
 	{
-	case State_Idle:
-		//キーボードのSpaceキーが押されたら。
-		if (g_keyboard->IsKeyTrigger(Keyboard::Space))
-		{
-			//ジャンプアニメーションを再生。
-			m_modelRender.PlayAnimation(enAnimationClip_Jump);
-			//ジャンプ速度を設定。
-			m_velocity.y = JUMP_VELOCITY;
-			//ジャンプ中にする。
-			m_state = State_Jump;
-		}
-		//キーボードのFキーが押されたら。
-		else if (g_keyboard->IsKeyTrigger(Keyboard::F))
-		{
-			//攻撃アニメーションを再生。
-			m_modelRender.PlayAnimation(enAnimationClip_Attack);
-			//攻撃中にする。
-			m_state = State_Attack;
-		}
-		//Spaceキー・Fキーが共に押されていなければ。
-		else
-		{
-			//待機アニメーションを再生。
-			m_modelRender.PlayAnimation(enAnimationClip_Idle);
-		}
-		break;
-	case State_Attack:
-		//攻撃アニメーションの再生が終了したら。
-		if (!m_modelRender.IsPlayingAnimation())
-		{
-			//攻撃中ではない。
-			m_state = State_Idle;
-		}
-		break;
-	case State_Jump:
-		//重力加算。
-		m_velocity.y -= GRAVITY_VELOCITY;
-		//移動処理。
-		m_position = m_charaCon.Execute(m_velocity, g_gameTime->GetFrameDeltaTime());
-		//地面に着いていたら。
-		if (m_charaCon.IsOnGround())
-		{
-			//ジャンプ中ではない。
-			m_state = State_Idle;
-			m_velocity.y = 0.0f;
-		}
-		break;
+		
+		DeleteCommand();
+		newCommand->Execute();
+		m_commandVector.push_back(std::move(newCommand));
+		m_commandIndex += 1;
 	}
+	UndoAndCancel();
 
-	m_modelRender.SetPosition(m_position + Vector3(0.0f, 70.0f, 0.0f));
-	m_modelRender.Update();
+	m_fontRender.SetText(std::to_wstring(m_position.y).c_str());
+	m_spriteRender.SetPosition(m_position);
+	m_spriteRender.Update();
+}
+
+std::unique_ptr<Command> Actor::HandleInput()
+{
+	//上キーが押されたら。
+	if (g_keyboard->IsKeyTrigger(Keyboard::Up))
+	{
+		//上に移動する。
+		Vector3 destPosition = m_position + Vector3(0.f, 100.f, 0.f);
+		return  std::make_unique<MoveActorCommand>(destPosition, this);
+	}
+	//下キーが押されたら。
+	if (g_keyboard->IsKeyTrigger(Keyboard::Down))
+	{
+		//下に移動する。
+		Vector3 destPosition = m_position + Vector3(0.f, -100.f, 0.f);
+		return  std::make_unique<MoveActorCommand>(destPosition, this);
+	}
+	//Enterキーが押されたら。
+	if (g_keyboard->IsKeyTrigger(Keyboard::Enter))
+	{
+		//座標をリセットする。
+		Vector3 destPosition = m_startPosition;
+		return  std::make_unique<MoveActorCommand>(destPosition, this);
+	}
+	return nullptr;
+}
+
+void Actor::UndoAndCancel()
+{
+	if (g_keyboard->IsKeyDown(Keyboard::LeftControl) && g_keyboard->IsKeyTrigger(Keyboard::Z))
+	{
+		m_commandVector[m_commandIndex]->Undo();
+		m_commandIndex -= 1;
+		if (m_commandIndex < 0) m_commandIndex = 0;
+	}
+	if (g_keyboard->IsKeyDown(Keyboard::LeftControl) && g_keyboard->IsKeyTrigger(Keyboard::Y))
+	{
+		m_commandIndex += 1;
+		if (m_commandIndex > m_commandVector.size() - 1) m_commandIndex = m_commandVector.size() - 1;
+		m_commandVector[m_commandIndex]->Execute();
+		
+	}
+}
+
+void Actor::DeleteCommand()
+{
+	if (m_commandIndex == m_commandVector.size() - 1)
+	{
+		return;
+	}
+	m_commandVector.erase(m_commandVector.begin()+ m_commandIndex+1, m_commandVector.end());
 }
 
 void Actor::Render(RenderContext& rc)
 {
-	m_modelRender.Draw(rc);
+	m_spriteRender.Draw(rc);
+	m_fontRender.Draw(rc);
 }

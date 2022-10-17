@@ -30,10 +30,10 @@
             <div>
                 この教材の中で紹介しているパターンの中で、最もゲーム開発において欠かせないパターンを1つ挙げろと言われれば、
                 このパターンを挙げます。
-                それだけ、GameLoopパターンはゲーム開発において重要なパターンとなります。
+                それだけ、<span class="strong-letter">GameLoopパターンはゲーム開発において重要なパターン</span>となります。
                 <div class="margin-letter"> 
                     今のようなゲーム(入力が無くても常時実行される)の前には、対話型のゲームが存在していました。
-                    ユーザーの入力に応じて、ゲームが進行するというものです。
+                    <span class="strong-letter">ユーザーの入力に応じて、ゲームが進行する</span>というものです。
                 </div>
                 <div class="margin-letter">
                     <code>
@@ -50,8 +50,90 @@
                     つまり、ユーザーから何らかの入力がされるまで、プログラムは何もせずただじっと待っているだけでした。
                 </div>
                 <div class="margin-letter">
-                    
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li>while (true)</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ユーザーからの入力。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;char* command = ReadCommand();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//入力を元にプログラムを実行。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;HandleCommand(command);</li>
+                    <li>}</li>
+                    </ol></code>
                 </div>
+                <div class="margin-letter">
+                  しかし、現在のゲームの殆どが<span class="strong-letter">ユーザーの入力の有無に関わらず進行</span>していきます。
+                  ユーザーの入力がなくてもアニメーションは動き続けますし、エフェクトも変化し続けています。
+                  <br>これがGameLoopにおいて、第一に重要な部分です。ユーザー入力があれば処理するのですが、入力を待つことはしません。
+                  ループは止まることなく回り続けています。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li>while (true)</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ユーザーからの入力を処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;HandleInput();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//更新処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;Update();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//描画処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;Render();</li>
+                    <li>}</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  GameLoopが1回りするたびに、ゲームの状態はある量だけ進行します。
+                  ゲーム世界の住人からすれば、彼らの時計の針が1目盛り進むわけです。
+                  <br>一方では、現実世界である我々の世界の時計も動いています。
+                  GameLoopの回転する速さを実際の時間で表したものが<span class="strong-letter">フレームレート(1秒あたりのフレーム数:Frames Per Second)</span>になるのです。
+                  GameLoopの回転が速いほどゲームは素早く動き、逆に遅いとゲームはスローモーションのようになります。
+                  <br><span class="strong-letter">GameLoopの速さは2つの要素によって決定</span>されます。
+                  1つは<span class="strong-letter">1フレームごとにしなければならない作業量</span>です。もう1つは、<span class="strong-letter">使用しているハードウェアの性能</span>です。
+                  Nintendo SwitchやPS5などのゲームの場合はハードウェアの性能が一定ですが、PCゲームの場合はユーザーによってハードウェアの性能が異なります。
+                  <br>昔は2つ目の要素は固定でした。
+                  ファミコンやPSでゲームを動かす場合、ハードウェアの性能が分かっているのでそれに合わせてゲームを実行すればよかったのです。
+                  <br>現在では、様々な家庭用ゲーム機の台頭・スマートフォンやPCゲームの普及により、様々なハードウェアでゲームを実行させることも珍しくなくなってきました。
+                  しかし、ハードウェアが違ってもゲームは一定の速度で実行されなければなりません。
+                  そこで、GameLoopパターンの出番というわけです。
+                </div>
+            </div>
+          </div>
+          <li id="2"><h2 class="margin-letter2">8.2 GameLoopパターン</h2></li>
+          <div class="letter">
+            <div>
+              実際のGameLoopのコードはかなり単純です。
+              幾つかのバリエーションを示し、それぞれの長所と短所を見ていきましょう。
+              <ul>
+                <div class="margin-letter">
+                  <h5><li>可能な限り速くする</li></h5>
+                  可能な限り単純なGameLoopは以下の通りです。
+                  <div class="margin-letter">
+                    <code>
+                      <ol class="code-region row coll-11">
+                      <li>while (true)</li>
+                      <li>{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ユーザーからの入力を処理。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;HandleInput();</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//更新処理。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;Update();</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//描画処理。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;Render();</li>
+                      <li>}</li>
+                      </ol></code>
+                  </div>
+                  <div class="margin-letter">
+                    このコードの問題点は、ゲームの実行速度を制御できない点です。
+                    ハードウェアの性能によっては、ゲームの実行速度が速くなったり遅くなったりしてしまいます。
+                    ゲームの実行速度が速すぎると、ユーザーはゲームに付いていけなくなるでしょう。
+
+                  </div>
+                </div>
+                <div class="margin-letter">
+                  <h5><li>速すぎないようにする</li></h5>
+                  では、ゲームの実行速度が速すぎないように、フレームレートが一定になるように調整してみましょう。
+                  
+                </div>
+              </ul>
             </div>
           </div>
         </ul>

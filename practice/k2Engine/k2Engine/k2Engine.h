@@ -92,6 +92,42 @@ namespace nsK2Engine {
 		/// ベクトルのデバッグ描画を無効にする。
 		/// </summary>
 		void SetDrawVectorDisable();
+		/// <summary>
+		/// ゲームの開始処理。
+		/// </summary>
+		void Start()
+		{
+			g_engine->BeginFrame();
+		}
+		/// <summary>
+		/// ゲームの更新処理。
+		/// </summary>
+		void Update()
+		{
+			auto& renderContext = g_graphicsEngine->GetRenderContext();
+			g_engine->ExecuteUpdate();
+			// レンダリングエンジンの更新。
+			m_renderingEngine.Update();
+		}
+		/// <summary>
+		/// 描画処理。
+		/// </summary>
+		void Render()
+		{
+			auto& renderContext = g_graphicsEngine->GetRenderContext();
+
+			g_engine->ExecuteRender();
+			//レンダリングエンジンを実行。		
+			m_renderingEngine.Execute(renderContext);
+
+			//当たり判定描画。
+			g_engine->DebubDrawWorld();
+
+			//////////////////////////////////////
+			//絵を描くコードを書くのはここまで！！！
+			//////////////////////////////////////
+			g_engine->EndFrame();
+		}
 #else
 		void DrawVector(const Vector3& vector, const Vector3& origin, const char* name = "no name")
 		{

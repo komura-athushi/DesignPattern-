@@ -13,7 +13,8 @@
     </ClCompile>
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Actor.cpp" />
-    <ClCompile Include="Background.cpp" />
+    <ClCompile Include="Command.cpp" />
+    <ClCompile Include="GameLoop.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -22,6 +23,7 @@
     </ClInclude>
     <ClInclude Include="Game.h" />
     <ClInclude Include="Actor.h" />
-    <ClInclude Include="Background.h" />
+    <ClInclude Include="Command.h" />
+    <ClInclude Include="GameLoop.h" />
   </ItemGroup>
 </Project>
