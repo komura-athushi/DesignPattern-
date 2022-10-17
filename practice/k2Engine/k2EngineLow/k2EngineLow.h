@@ -223,6 +223,10 @@ namespace nsK2EngineLow {
 		{
 			m_isShowFPS = isShowFPS;
 		}
+		void End()
+		{
+			m_gameTime.EndMeasurement();
+		}
 	private:
 #ifdef K2_DEBUG
 		std::unique_ptr<Font> m_fpsFont;

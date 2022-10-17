@@ -128,6 +128,10 @@ namespace nsK2Engine {
 			//////////////////////////////////////
 			g_engine->EndFrame();
 		}
+		void End()
+		{
+			g_engine->End();
+		}
 #else
 		void DrawVector(const Vector3& vector, const Vector3& origin, const char* name = "no name")
 		{

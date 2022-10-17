@@ -43,7 +43,8 @@ namespace nsK2Engine {
 			EnModelUpAxis enModelUpAxis = enModelUpAxisZ,
 			bool isShadowReciever = true,
 			int maxInstance = 1,
-			bool isFrontCullingOnDrawShadowMap = false);
+			bool isFrontCullingOnDrawShadowMap = false,
+			bool isFootStep = true);
 		/// <summary>
 		/// 半透明描画を行うオブジェクトを初期化。
 		/// </summary>
@@ -71,7 +72,8 @@ namespace nsK2Engine {
 			EnModelUpAxis enModelUpAxis = enModelUpAxisZ,
 			bool isShadowReciever = true,
 			int maxInstance = 1,
-			bool isFrontCullingOnDrawShadowMap = false);
+			bool isFrontCullingOnDrawShadowMap = false,
+			bool isFootStep = true);
 		/// <summary>
 		/// 特殊なシェーディングを行いたい場合の初期化処理。
 		/// </summary>
@@ -302,7 +304,8 @@ namespace nsK2Engine {
 		/// <param name="enModelUpAxis">モデルの上向き。</param>
 		void InitAnimation(AnimationClip* animationClips,
 			int numAnimationClips,
-			EnModelUpAxis enModelUpAxis);
+			EnModelUpAxis enModelUpAxis,
+			bool isFootStep);
 		/// <summary>
 		/// 頂点計算パスから呼び出される処理。
 		/// </summary>

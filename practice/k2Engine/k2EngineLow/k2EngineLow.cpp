@@ -92,8 +92,6 @@ namespace nsK2EngineLow {
 			m_fpsLimitter.Wait();
 		}
 //#endif
-		m_gameTime.EndMeasurement();
-
 	}
 
 	void K2EngineLow::ExecuteUpdate()

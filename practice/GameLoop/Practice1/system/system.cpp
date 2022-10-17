@@ -4,8 +4,6 @@
 #include "graphics/RenderingEngine.h"
 #include "sound/SoundEngine.h"
 
-#include "DirectXTK/Inc/Keyboard.h"
-
 HWND			g_hWnd = NULL;				//ウィンドウハンドル。
 
 ///////////////////////////////////////////////////////////////////
@@ -22,30 +20,11 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		//スエンジンの破棄。
 		PostQuitMessage(0);
-		break;
-	case WM_ACTIVATE:
-	case WM_ACTIVATEAPP:
-		DirectX::Keyboard::ProcessMessage(msg, wParam, lParam);
-		break;
-
-	case WM_SYSKEYDOWN:
-		if (wParam == VK_RETURN && (lParam & 0x60000000) == 0x20000000)
-		{
-			// This is where you'd implement the classic ALT+ENTER hotkey for fullscreen toggle
-			//...
-		}
-		DirectX::Keyboard::ProcessMessage(msg, wParam, lParam);
-		break;
-
-	case WM_KEYDOWN:
-	case WM_KEYUP:
-	case WM_SYSKEYUP:
-		DirectX::Keyboard::ProcessMessage(msg, wParam, lParam);
-		break;
-	
+		break;	
 	default:
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
+
 	return 0;
 }
 

@@ -59,14 +59,15 @@ namespace nsK2Engine {
 		EnModelUpAxis enModelUpAxis,
 		bool isShadowReciever,
 		int maxInstance,
-		bool isFrontCullingOnDrawShadowMap)
+		bool isFrontCullingOnDrawShadowMap,
+		bool isFootStep)
 	{
 		//インスタンシング描画用のデータを初期化。
 		InitInstancingDraw(maxInstance);
 		//スケルトンを初期化。
 		InitSkeleton(filePath);
 		//アニメーションを初期化。
-		InitAnimation(animationClips, numAnimationClips, enModelUpAxis);
+		InitAnimation(animationClips, numAnimationClips, enModelUpAxis,isFootStep);
 		// アニメーション済み頂点バッファの計算処理を初期化。
 		InitComputeAnimatoinVertexBuffer(filePath, enModelUpAxis);
 		//半透明オブジェクト描画パスで使用されるモデルを初期化。
@@ -119,14 +120,15 @@ namespace nsK2Engine {
 		EnModelUpAxis enModelUpAxis,
 		bool isShadowReciever,
 		int maxInstance,
-		bool isFrontCullingOnDrawShadowMap)
+		bool isFrontCullingOnDrawShadowMap,
+		bool isFootStep)
 	{
 		// インスタンシング描画用のデータを初期化。
 		InitInstancingDraw(maxInstance);
 		// スケルトンを初期化。
 		InitSkeleton(filePath);
 		// アニメーションを初期化。
-		InitAnimation(animationClips, numAnimationClips, enModelUpAxis);
+		InitAnimation(animationClips, numAnimationClips, enModelUpAxis,isFootStep);
 		// アニメーション済み頂点バッファの計算処理を初期化。
 		InitComputeAnimatoinVertexBuffer(filePath, enModelUpAxis);
 		// GBuffer描画用のモデルを初期化。
@@ -167,14 +169,15 @@ namespace nsK2Engine {
 		m_skeleton.Init(skeletonFilePath.c_str());
 	}
 
-	void ModelRender::InitAnimation(AnimationClip* animationClips, int numAnimationClips, EnModelUpAxis enModelUpAxis)
+	void ModelRender::InitAnimation(AnimationClip* animationClips, int numAnimationClips, EnModelUpAxis enModelUpAxis, bool isFootStep)
 	{
 		m_animationClips = animationClips;
 		m_numAnimationClips = numAnimationClips;
 		if (m_animationClips != nullptr) {
 			m_animation.Init(m_skeleton,
 				m_animationClips,
-				numAnimationClips);
+				numAnimationClips,
+				isFootStep);
 		}
 	}
 

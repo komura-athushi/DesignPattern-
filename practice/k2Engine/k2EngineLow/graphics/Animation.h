@@ -48,7 +48,8 @@ namespace nsK2EngineLow {
 		void Init(
 			Skeleton& skeleton,
 			AnimationClip* animClips,
-			int numAnimClip
+			int numAnimClip,
+			bool isFootStep = true
 		);
 		/// <summary>
 		/// アニメーションの再生。

@@ -33,6 +33,7 @@ private:
 	/// </summary>
 	void End()
 	{
+		K2Engine::GetInstance()->End();
 		float endTime = CurrentTime();
 		printf("fps  %f\n", 1.0f / (endTime - m_startTime));
 	}

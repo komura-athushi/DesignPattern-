@@ -23,7 +23,7 @@ void GameLoop::Loop()
 	float currentTime = CurrentTime();
 	//30FPSの時に1フレームに実行する時間-実際に1フレームで経過した時間
 	//分だけ処理を停止する。
-	Stop(startTime + MS_PER_FRAME - currentTime);
+	//Stop(startTime + MS_PER_FRAME - currentTime);
 
 	//FPS表示。
 	End();

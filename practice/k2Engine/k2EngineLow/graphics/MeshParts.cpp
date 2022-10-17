@@ -204,10 +204,10 @@ namespace nsK2EngineLow {
 		auto& materialBank = GetMaterialBank();
 		mesh->m_materials.reserve(tkmMesh.materials.size());
 		for (auto& tkmMat : tkmMesh.materials) {
-			char materiayKey[MAX_PATH];
+			char materiayKey[400];
 			sprintf_s(
 				materiayKey,
-				MAX_PATH,
+				400,
 				"%s, %s, %s, %s, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %s, %s, %s, %s",
 				fxFilePath,
 				vsEntryPointFunc,

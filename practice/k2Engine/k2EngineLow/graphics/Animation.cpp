@@ -14,7 +14,8 @@ namespace nsK2EngineLow {
 	void Animation::Init(
 		Skeleton& skeleton,
 		AnimationClip* animClips,
-		int numAnimClip)
+		int numAnimClip,
+		bool isFootStep)
 	{
 		m_skeleton = &skeleton;
 		for (int i = 0; i < numAnimClip; i++) {
@@ -25,7 +26,7 @@ namespace nsK2EngineLow {
 		int numBone = m_skeleton->GetNumBones();
 		for (int boneNo = 0; boneNo < numBone; boneNo++) {
 			auto bone = m_skeleton->GetBone(boneNo);
-			if (wcscmp(bone->GetName(), L"Spine") == 0) {
+			if (isFootStep && wcscmp(bone->GetName(), L"Spine") == 0) {
 				//footstepƒ{[ƒ“‚ªŒ©‚Â‚©‚Á‚½B
 				footstepBoneNo = boneNo;
 				break;

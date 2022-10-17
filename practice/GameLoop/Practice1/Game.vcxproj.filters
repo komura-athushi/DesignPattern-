@@ -12,8 +12,16 @@
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="Actor.cpp" />
-    <ClCompile Include="Command.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="GameCamera.cpp" />
+    <ClCompile Include="Background.cpp" />
+    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="FireBall.cpp" />
+    <ClCompile Include="Lever.cpp" />
+    <ClCompile Include="Door.cpp" />
+    <ClCompile Include="Title.cpp" />
+    <ClCompile Include="Boss.cpp" />
+    <ClCompile Include="Fade.cpp" />
     <ClCompile Include="GameLoop.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -22,8 +30,16 @@
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="Game.h" />
-    <ClInclude Include="Actor.h" />
-    <ClInclude Include="Command.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="GameCamera.h" />
+    <ClInclude Include="Background.h" />
+    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="FireBall.h" />
+    <ClInclude Include="Lever.h" />
+    <ClInclude Include="Door.h" />
+    <ClInclude Include="Title.h" />
+    <ClInclude Include="Boss.h" />
+    <ClInclude Include="Fade.h" />
     <ClInclude Include="GameLoop.h" />
   </ItemGroup>
 </Project>
