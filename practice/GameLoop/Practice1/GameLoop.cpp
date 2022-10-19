@@ -15,6 +15,6 @@ void GameLoop::Loop()
 	//設定した時間だけプログラムを停止(単位:秒)
 	Stop(0.01f);
 
-	//FPS表示。
+	//FPS確定。
 	End();
 }

@@ -243,7 +243,7 @@ namespace nsK2EngineLow {
 		GameTime m_gameTime;
 		FPSLimitter m_fpsLimitter;						// FPS‚É§ŒÀ‚ğ‚©‚¯‚éˆ—B
 		FrameRateInfo m_frameRateInfo = { enFrameRateMode_Variable , 60};
-		bool			m_isLimittedFPS = false;
+		bool			m_isLimittedFPS = true;
 		bool			m_isShowFPS = true;
 	};
 

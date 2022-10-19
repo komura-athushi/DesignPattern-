@@ -131,9 +131,213 @@
                 <div class="margin-letter">
                   <h5><li>速すぎないようにする</li></h5>
                   では、ゲームの実行速度が速すぎないように、フレームレートが一定になるように調整してみましょう。
-                  
+                  必要なのは、<span class="strong-letter">フレームの処理を終了したときに次のフレームの処理まで待ち時間を設ける</span>ことです。
+                  図に表すと以下のようになります。
+                
+                  <div>
+                    <img src="image/7/1.png" class="margin-letter">
+                  </div>
+                  <div class="margin-letter">
+                    コードは次のようなものになります。
+                  </div>
+                  <div class="margin-letter">
+                    <code>
+                    <ol class="code-region row coll-11">
+                    <li>while (true)</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレーム開始時における、プログラム開始時からの経過時間を取得。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;float startTime = GetCurrentTime();</li>
+                    <li></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//入力処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;HandleInput();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//更新処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;Update();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//描画処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;Render();</li>
+                    <li></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//0.016は60FPSの際に1フレームにかかる時間。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//FPSに合わせた1フレームにかかる時間-実際に処理にかかった時間</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//分だけ待ち時間を設ける。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;sleep(start + 0.016f - GetCurrentTime());</li>
+                    <li>}</li>
+                      </ol></code>
+                  </div>
+                  <div class="margin-letter">
+                    ゲームが速くなりすぎることを防ぐことには成功しましたが、ゲームが遅くなりすぎる場合には何の役にも立ちません。
+                    1フレームでの作業量を減少させれば_____グラフィックを簡略化したりAIを単純にしたり＿＿＿遅くなることを回避できることもありますが、そうすると速い機器を使っているユーザーに質の低下が起こります。
+                  </div>
                 </div>
               </ul>
+            </div>
+          </div>
+          <li id="3"><h2 class="margin-letter2">8.3 練習問題1</h2></li>
+          <div class="letter">
+            <div>
+              practice/GameLoop/Practice1/Game.slnからVisualStudioを立ち上げてください。
+              実行すると、以下のようなゲームが起動します。
+              Iキーで攻撃、Lキーで魔法攻撃、Jキーでレバー操作です。
+              <div>
+                <img src="image/7/2.png" class="margin-letter">
+                <br><img src="image/7/3.png" class="margin-letter">
+              </div>
+              <div class="margin-letter">
+                GameLoopクラスには、ゲームループ内の処理が記述されています。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>void GameLoop::Loop()</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレーム開始時の処理。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Start();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//更新処理。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Update();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//描画処理。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Render();</li>
+                  <li></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//現時点で、プログラム実行時からの経過時間を取得(単位:秒)。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;float currentTime = CurrentTime();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//設定した時間だけプログラムを停止(単位:秒)</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Stop(0.01f);</li>
+                  <li></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//FPS確定。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;End();</li>
+                  <li>}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                <span class="strong-letter">GameLoopクラスのLoop関数を改造して、FPSを30で固定にしてください。</span>
+                <ul>
+                  <li>CurrentTime関数とStop関数を活用してください。</li>
+                  <li>30FPSの場合、1フレームあたりの時間は33ミリ秒になります。</li>
+                  <li>Answerに実装例がありますので、参考にしてください。</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <li id="4"><h2 class="margin-letter2">8.4 より柔軟なGameLoop</h2></li>
+          <div class="letter">
+            <div>
+                上記のGameLoopの問題点は、<span class="strong-letter">FPSが幾つであろうと1フレームごとに進むゲーム時間が一定</span>な事です。
+                そのためフレームレートが遅ければゲーム時間の進みは遅くなりますし、フレームレートが速ければゲーム時間の進みが速くなってしまいます。
+                <ul>
+                  <div class="margin-letter">
+                    <h5><li>可変(流動的)更新間隔</li></h5>
+                    では、<span class="strong-letter">各フレームの処理時間に合わせてゲーム時間の進行を調整</span>するようにしてみましょう。
+                    <span class="strong-letter">フレームの更新に時間がかかれば、それに合わせてゲーム時間の増加量を増加</span>させます。
+                    この手法は可変(流動的)更新間隔と呼ばれています。
+                    <div class="margin-letter">
+                      <code>
+                        <ol class="code-region row coll-11">
+                        <li>float lastTime = GetCurrentTime();</li>
+                        <li>while (true)</li>
+                        <li>{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//フレーム開始時における、プログラム開始時からの経過時間を取得。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;float currentTime = GetCurrentTime();</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//前フレームの開始時間-現フレームの開始時間</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//で前フレームの処理時間を計算。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;float elapsedTime = currentTime - lastTime;</li>
+                        <li></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//入力処理。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;HandleInput();</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//更新処理。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//各フレームの処理時間を引数に。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;Update(elapsedTime);</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//描画処理。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;Render();</li>
+                        <li></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;lastTime = currentTime;</li>
+                        <li>}</li>
+                        <li><font style="color:lightgreen;font-style:italic;">//....</font></li>
+                        <li></li>
+                        <li>void Actor::Update(float elapsedTime)</li>
+                        <li>{</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//各フレームの処理時間に合わせて、ゲーム時間を進める。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;m_position += moveSpeed * elapsedTime;</li>
+                        <li>}</li>
+                        </ol></code>
+                    </div>
+                    <div class="margin-letter">
+                      如何でしょうか。フレームレートに関わらず、実時間に合わせてゲーム時間が進行するようになりました。
+                      この方法がGameLoopにおける最善の方法のように思えます。
+                      <ul>
+                        <li>ゲームはハードウェアが違っても一定の速さで進行する。</li>
+                        <li>速い機器で遊ぶプレイヤーは滑らかに動くゲームが楽しめる。</li>
+                      </ul>
+                      ところが、残念なことに深刻な問題が待ち構えています。
+                      それは、この手法ではゲームが非決定論的(プログラムを実行する度に結果が変わってしまう)になってしまい不安定になるのです。
+                      実例を上げましょう。
+                    </div>
+                    <div class="margin-letter">
+                        2人のプレイヤー(ジョージ・フレッド)がオンラインFPSゲームをしていたとしましょう。
+                        ジョージの方は高性能なPCでゲームをしており50FPSがでます。
+                        しかし、フレッドは古いPCでゲームをしているので5FPSしか出ません。
+                        <br>弾の計算には浮動小数点を使っているので、誤差が発生します。
+                        浮動小数点の計算を繰り返すほど、誤差が大きくなる可能性があります。
+                        ジョージはフレッドに比べて更新処理回数が10倍もありますので、フレッドよりも誤差が大きくなってしまいます。
+                        <span class="strong-letter">2人のPCで弾の最終的な位置が異なってしまう</span>かもしれません。
+                    </div>
+                    <div class="margin-letter">
+                      これは可変更新間隔が引き起こす問題の1つに過ぎません。
+                      他にも問題は存在します。
+                      <br>ゲームの物理エンジンでは、実際の物理法則を近似して使用しています。
+                      この近似は、更新間隔に合わせて注意深く設定されているのです。
+                      それを変化させると(更新間隔)、<span class="strong-letter">物理シミュレーションが不安定</span>になってしまいます。
+                    </div>
+                  </div>
+                  <div class="margin-letter">
+                    <h5><li>更新処理のFPSを固定にする</li></h5>
+                      上記のような問題が起こるため、理想はFPSを固定にすることです。
+                      <br>描画の部分は、可変更新間隔による影響をあまり受けません。
+                      ある瞬間に起こったことを描画すればいいだけなのです。
+                      <br>この特性を利用しましょう。
+                      <span class="strong-letter">更新処理と描画処理を分割</span>して、<span class="strong-letter">更新処理は固定時間間隔で行われる</span>ようにしましょう。
+                      <br>実際のコードは次のようになります。
+                    <div class="margin-letter">
+                      <code>
+                      <ol class="code-region row coll-11">
+                      <li><font style="color:lightgreen;font-style:italic;">//ループ前の経過時間を取得。</font></li>
+                      <li>float previous = GetCurrentTime();</li>
+                      <li><font style="color:lightgreen;font-style:italic;">//実時間(経過時間)とゲーム時間のズレ。</font></li>
+                      <li><font style="color:lightgreen;font-style:italic;">//実時間-(更新処理の実行回数*固定FPSにした際の1フレームあたりの処理時間)</font></li>
+                      <li>float lag = 0.0f;</li>
+                      <li>while (true)</li>
+                      <li>{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;float currentTime = GetCurrentTime();</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//前フレームの処理時間。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;float elapsedTime = currentTime - previous;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;previous = currentTime;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//前フレームの処理時間を加算。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;lag += elapsedTime;</li>
+                      <li></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//入力処理。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;HandleInput();</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//lagが一定値以下になるまで、更新処理を行う。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;while (lag &gt;= MS_PER_UPDATE)</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//更新処理。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Update();</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lag -= MS_PER_UPDATE;</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//描画処理。</font></li>
+                      <li>&nbsp;&nbsp;&nbsp;&nbsp;Render();</li>
+                      <li>}</li>
+                      </ol></code>
+                    </div>
+                    <div class="margin-letter">
+                      実時間からゲーム時間を引き、
+                      その時間のズレ分だけ更新処理を固定時間間隔で行うようにします。
+                      図に表すと以下のようになります。
+                    </div>
+                    <div>
+                      <img src="image/7/4.png" class="margin-letter">
+                    </div>
+                    <div class="margin-letter">
+                      
+                    </div>
+                  </div>
+                </ul>
+                
             </div>
           </div>
         </ul>

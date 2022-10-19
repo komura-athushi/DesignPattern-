@@ -27,15 +27,19 @@ private:
 	void Render()
 	{
 		K2Engine::GetInstance()->Render();
+		float time = g_gameTime->GetFrameDeltaTime();
+		wchar_t text[256];
+		swprintf(text, L"FPS = %0.2f", 1.0f / time);
+		m_fontRender.SetText(text);
+		m_fontRender.SetPosition(Vector3(-950.0f, 520.0f, 1.0f));
+		m_fontRender.Draw(g_graphicsEngine->GetRenderContext());
 	}
 	/// <summary>
-	/// FPS描画。
+	/// FPS確定。
 	/// </summary>
 	void End()
 	{
 		K2Engine::GetInstance()->End();
-		float endTime = CurrentTime();
-		printf("fps  %f\n", 1.0f / (endTime - m_startTime));
 	}
 	/// <summary>
 	/// プログラム実行から何秒経過したかを返す。
@@ -62,5 +66,6 @@ private:
 	}
 private:
 	float			m_startTime = 0.0f;
+	FontRender		m_fontRender;
 };
 

@@ -92,6 +92,21 @@ namespace nsK2Engine {
 		/// ベクトルのデバッグ描画を無効にする。
 		/// </summary>
 		void SetDrawVectorDisable();
+#else
+		void DrawVector(const Vector3& vector, const Vector3& origin, const char* name = "no name")
+		{
+
+		}
+		void SetDrawVectorEnable()
+		{
+
+		}
+		void SetDrawVectorDisable()
+		{
+
+		}
+#endif // #ifdef K2_DEBUG
+
 		/// <summary>
 		/// ゲームの開始処理。
 		/// </summary>
@@ -132,20 +147,6 @@ namespace nsK2Engine {
 		{
 			g_engine->End();
 		}
-#else
-		void DrawVector(const Vector3& vector, const Vector3& origin, const char* name = "no name")
-		{
-
-		}
-		void SetDrawVectorEnable()
-		{
-
-		}
-		void SetDrawVectorDisable()
-		{
-
-		}
-#endif // #ifdef K2_DEBUG
 	private:
 
 		K2EngineLow m_k2EngineLow;							// 

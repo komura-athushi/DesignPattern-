@@ -76,7 +76,6 @@ namespace nsK2EngineLow {
 		if (m_isShowFPS) {
 			m_fpsFont->Begin(g_graphicsEngine->GetRenderContext());
 			float time = g_gameTime->GetFrameDeltaTime();
-			float time2 = g_gameTime->GetFrameDeltaTime();;
 			wchar_t text[256];
 			swprintf(text, L"FPS = %0.2f", 1.0f / time);
 			m_fpsFontShadow->Draw(text, { UI_SPACE_WIDTH * -0.48f + 3.0f , UI_SPACE_HEIGHT * 0.48f - 3.0f }, { 0.0f, 0.0f, 0.0f, 1.0f }, 0.0f, 1.0f, { 0.0f, 1.0f });
@@ -102,14 +101,14 @@ namespace nsK2EngineLow {
 		g_keyboard.get()->Update();
 		g_soundEngine->Update();
 		GameObjectManager::GetInstance()->ExecuteUpdate();
-		// エフェクトエンジンの更新。
-		EffectEngine::GetInstance()->Update(g_gameTime->GetFrameDeltaTime());
 	}
 	/// <summary>
 	/// 描画処理を実行。
 	/// </summary>
 	void K2EngineLow::ExecuteRender()
 	{
+		// エフェクトエンジンの更新。
+		EffectEngine::GetInstance()->Update(g_gameTime->GetFrameDeltaTime());
 		auto& renderContext = g_graphicsEngine->GetRenderContext();
 		// ゲームオブジェクトマネージャーの描画処理を実行。
 		GameObjectManager::GetInstance()->ExecuteRender(renderContext);

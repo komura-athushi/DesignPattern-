@@ -49,7 +49,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	//////////////////////////////////////
 	// ここから初期化を行うコードを記述する。
 	//////////////////////////////////////
-	InitStandardIOConsole();
+	//InitStandardIOConsole();
 
 	//Gameクラスのオブジェクトを作成。
 	NewGO<Title>(0, "title");
@@ -73,7 +73,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		//K2Engine::GetInstance()->Execute();
 	}
 
-	CloseStandardIOConsole();
+	//CloseStandardIOConsole();
 	K2Engine::DeleteInstance();
 
 #ifdef _DEBUG
