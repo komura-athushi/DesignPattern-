@@ -33,9 +33,6 @@ private:
 		m_gameTime.CountUpdateProcess();
 		m_fpsRender.SetPosition(Vector3(-950.0f, 520.0f, 1.0f));
 		m_fpsRender2.SetPosition(Vector3(-950.0f, 480.0f, 1.0f));
-
-		m_fpsRender.SetColor(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
-		m_fpsRender2.SetColor(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
 	}
 	/// <summary>
 	/// •`‰æˆ—B

@@ -24,6 +24,7 @@ void Actor::Update()
 	}
 	if (g_keyboard->IsKeyTrigger(Keyboard::Enter))
 	{
+		//Observer‚É’Ê’mB
 		Notify(enEvent_PressEnter);
 	}
 }
