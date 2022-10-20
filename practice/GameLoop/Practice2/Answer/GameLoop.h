@@ -8,7 +8,7 @@ public:
 	GameLoop(){}
 	void Loop();
 	/// <summary>
-	/// ループ開始直前時の経過時間を計測します。
+	/// ループ開始直後の経過時間を計測します。
 	/// </summary>
 	void SetPrevious()
 	{
@@ -89,6 +89,7 @@ private:
 private:
 	float			m_startTime = 0.0f;
 	float			m_previous = 0.0f;
+	float			m_lag = 0.0f;
 	FontRender		m_fpsRender;
 	FontRender		m_fpsRender2;
 	TimeMeasured	m_gameTime;

@@ -3,27 +3,31 @@
 
 namespace
 {
-	//30FPSの際に、1フレームに実行される時間。
-	const float MS_PER_FRAME = 0.033f;
+	//120FPSの際の、1フレームあたりの処理時間。
+	const float MS_PER_UPDATE = 0.00833f;
 }
 
 void GameLoop::Loop()
 {
-	//フレーム開始時の時間を取得。
-	float startTime = CurrentTime();
+	float currentTime = CurrentTime();
+	//前フレームの処理時間。
+	float elapsedTime = currentTime - m_previous;
+	m_previous = currentTime;
+
+	m_lag += elapsedTime;
 
 	//フレーム開始時の処理。
 	Start();
-	//更新処理。
-	Update();
+	//実時間のズレ分だけ更新処理を行う。
+	while (m_lag >= MS_PER_UPDATE)
+	{
+		//更新処理。
+		Update();
+		m_lag -= MS_PER_UPDATE;
+	}
+
 	//描画処理。
 	Render();
-
-	//現時点の経過時間を取得。
-	float currentTime = CurrentTime();
-	//30FPSの時に1フレームに実行する時間-実際に1フレームで経過した時間
-	//分だけ処理を停止する。
-	Stop(startTime + MS_PER_FRAME - currentTime);
 
 	//FPS確定。
 	End();
