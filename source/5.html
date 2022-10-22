@@ -200,12 +200,12 @@
               <ol>
                 <div class="margin-letter">
                   <h5><li>バグ探しの難易度が上がる</li></h5>
-                  グローバル変数はその性質上、様々な要素から1つのインスタンスにアクセスが集中することになります。もし、変数に異常が見つかった場合、全てのグローバル変数を利用した関数呼び出しの中から、たった一箇所の誤りを探さなければなりません。
+                  グローバル変数はその性質上、<span class="strong-letter">様々な要素から1つのインスタンスにアクセスが集中</span>することになります。もし、変数に異常が見つかった場合、全てのグローバル変数を利用した関数呼び出しの中から、たった一箇所の誤りを探さなければなりません。
                   何百万というコードの中から、関数呼び出しの箇所を検索しなければならない状況に陥れば＿＿＿＿＿＿誰だって、グローバル変数が大嫌いになるでしょう。
                 </div>
                 <div class="margin-letter">
                   <h5><li>コードの結合度が上がる</li></h5>
-                  グローバル変数はその特性上、ファイルをincludeすれば如何なるクラスからも容易にインスタンスへのアクセスが可能になってしまいます。
+                  グローバル変数はその特性上、ファイルをincludeすれば<span class="strong-letter">如何なるクラスからも容易にインスタンスへのアクセスが可能</span>になってしまいます。
                   物理処理の中でサウンドを鳴らすという、物理シミュレーションとサウンド処理が結合してしまうことが、起こってしまうのです。
                   これらの問題は、<span class="strong-letter">インスタンスへのアクセスを制限</span>することで解決できます。
                 </div>
@@ -223,37 +223,25 @@
                 <ul>
                   <div class="margin-letter">
                     <h5><li>遅延初期化による制御困難</li></h5>
-                    Singletonパターンでは、static変数の初期化が関数が呼び出された際に実行されます。これはSingletonパターンの利点でもあり欠点でもあるのです。
+                    Singletonパターンでは、<span class="strong-letter">static変数の初期化が関数が呼び出された際に実行</span>されます。これはSingletonパターンの利点でもあり欠点でもあるのです。
                     <br>ゲーム開発においては、フレームレートを落とさないために、また限られたメモリを上手く使用するために、メモリの割り当て・リソースの読み込みについては大変気を付けなければなりません。
-                    例えば、サウンドが最初に出力される際にサウンドシステムの初期化を行ってしまうと(それはゲームの最中でしょう)、フレームレートが落ちたり動きがギクシャクしてしまうかもしれません。
+                    例えば、<span class="strong-letter">サウンドが最初に出力される際にサウンドシステムの初期化を行ってしまうと(それはゲームの最中でしょう)、フレームレートが落ちたり動きがギクシャク</span>してしまうかもしれません。
                     また、サウンドシステムの初期化にヒープ(メモリ領域の1つ)上に大きなブロックを確保する必要があるのであれば、ヒープのどの位置に確保されるのかを制御するために初期化の正確な時期を知る必要があります。
                     この問題が発生するがために、以下のようなSingletonパターンを実装します。
                     <div class="margin-letter">
                       <code>
                         <ol class="code-region row coll-11">
-                        <li><font style="color:lightgreen;font-style:italic;">//基底クラス。</font></li>
-                        <li>class GameObject</li>
+                        <li>class FileSystem</li>
                         <li>{</li>
-                        <li><font style="color:lightgreen;font-style:italic;">//派生クラス以外からのアクセスを禁止する。</font></li>
-                        <li>protected:</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;Log* GetLog()</li>
+                        <li>public:</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;static FileSystem&amp; GetInstance()</li>
                         <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return &amp;m_log;</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return m_instance;</li>
                         <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
                         <li>private:</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ログを出力するクラス。</font></li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;static Log m_log;</li>
-                        <li>};</li>
-                        <li></li>
-                        <li><font style="color:lightgreen;font-style:italic;">//敵クラス。</font></li>
-                        <li><font style="color:lightgreen;font-style:italic;">//GameObjectを継承。</font></li>
-                        <li>class Enemy : public GameObject</li>
-                        <li>{</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;void Attack()</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//攻撃したというログを出力する。</font></li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GetLog.Write(<font style="color:lightcoral;">"Enemy attacked!"</font>);</li>
-                        <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;FileSystem(){}</li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//静的メンバ変数、プログラム実行と同時に初期化される。</font></li>
+                        <li>&nbsp;&nbsp;&nbsp;&nbsp;static  FileSystem      m_instance;         </li>
                         <li>};</li>
                         </ol></code>
                     </div>
@@ -298,7 +286,7 @@
                       </ol></code>
                   </div>
                   <div class="margin-letter">
-                    このコードを見れば、BulletManagerはSingletonにしようと思うのは当然です。では、最終的にBulletManagerのインスタンスは幾つひつようでしょうか。
+                    このコードを見れば、BulletManagerはSingletonにしようと思うのは当然です。では、最終的にBulletManagerのインスタンスは幾つ必要でしょうか。
                     <br>答えは「0」です。
                   </div>
                   <div class="margin-letter">
@@ -325,7 +313,7 @@
                   <div class="margin-letter">
                     如何でしょうか。マネージャークラスはありませんが、問題ありません。マネージャークラスは、対象クラスの「ヘルパークラス」であることがよく見られます。
                     可能であれば、その<span class="strong-letter">「ヘルプ」機能を対象クラスに移動</span>させてしまいましょう。
-                    そもそもOOP(オブジェクト指向プログラミング)というのは、クラスにクラス自身のお世話をさせるというものなのですから。
+                    そもそもOOP(オブジェクト指向プログラミング)というのは、クラスにクラス自身のお世話をさせるというものなのです。
                   </div>
                 </div>
                 <div class="margin-letter">
