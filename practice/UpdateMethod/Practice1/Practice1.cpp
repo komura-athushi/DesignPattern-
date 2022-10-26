@@ -9,68 +9,18 @@
 #include "SkeletonSoldier.h"
 #include "Valkyrie.h"
 
-class World
-{
-public:
-    void Update()
-    {
-        for (auto& entity : m_entityList)
-        {
-            Sleep(2000.0f);
-            entity->Update();
-           
-        }
-    }
-    void AddEntity(Entity* entity)
-    {
-        m_entityList.push_back(entity);
-    }
-private:
-    std::vector<Entity*> m_entityList;
-};
+#include "World.h"
 
 int main()
 {
     World world;
-    Valkyrie valkyrie;
-    SkeletonSoldier skeletonSoldier;
-    valkyrie.SetHP(1000);
-    skeletonSoldier.SetHP(500);
-    valkyrie.SetAttack(80);
-    skeletonSoldier.SetAttack(100);
-    valkyrie.SetTarget(&skeletonSoldier);
-    skeletonSoldier.SetTarget(&valkyrie);
-
-    world.AddEntity(&valkyrie);
-    world.AddEntity(&skeletonSoldier);
 
     std::cout << "戦闘開始！\n";
     printf("骸骨兵士が現れた！\n");
 
-    int count = 1;
-    while (true)
-    {
-        Sleep(4000.0f);
-
-        printf("%dターン目！\n",count);
-        world.Update();
-        count++;
-        printf("\n");
-        /*
-        //標準出力コンソールのハンドルを取得。
-        HANDLE hCons = GetStdHandle(STD_OUTPUT_HANDLE);
-        COORD pos;
-        pos.X = 0;
-        pos.Y = 0;
-        //標準コンソールのカーソルを0行目、0列に戻す。
-        SetConsoleCursorPosition(hCons, pos);
-        for (int i = 0; i < 8; i++)
-        {
-            printf("aaaaaaaaaaaaaaaaaaaa\n");
-        }
-        */
-    }
+    world.GameLoop();
 }
+
 
 // プログラムの実行: Ctrl + F5 または [デバッグ] > [デバッグなしで開始] メニュー
 // プログラムのデバッグ: F5 または [デバッグ] > [デバッグの開始] メニュー

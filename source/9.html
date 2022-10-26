@@ -28,15 +28,238 @@
           <li id="1"><h2 class="margin-letter2">9.1 UpdateMethodパターン誕生の背景</h2></li>
           <div class="letter">
             <div>
-                プレイヤーは最強の戦乙女&lt;ヴァルキリー&gt;となり、魔王に支配された人間界を救うため、魔王討伐の旅に向かいます。
+                この章では、UpdateMethodパターンについて学んでいきましょう。
+                <span class="strong-letter">UpdateMethodパターンは、GameLoopパターンと並んでゲーム開発において重要なパターン</span>です。
+                <br>プレイヤーは最強の戦乙女&lt;ヴァルキリー&gt;となり、魔王に支配された人間界を救うため、魔王討伐の旅に向かいます。
                 そして、ついに魔王が住む魔王城に到達しました。
                 では、魔王城の番人を務める骸骨兵士を実装しましょう。
                 <br>とりあえず、今まで学んだゲームプログラミングについては全て忘れて、至極単純なコードで実装してみましょう。
                 <div class="margin-letter">
-                  
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li><font style="color:lightgreen;font-style:italic;">//骸骨兵士。</font></li>
+                    <li>SkeletonSoldier skeletonSoldier;</li>
+                    <li><font style="color:lightgreen;font-style:italic;">//左側を警備していたらtrue。</font></li>
+                    <li>bool    patrollingleft = false;</li>
+                    <li><font style="color:lightgreen;font-style:italic;">//骸骨兵士のx座標。</font></li>
+                    <li>float x = 0;</li>
+                    <li></li>
+                    <li><font style="color:lightgreen;font-style:italic;">//ゲームのループ。</font></li>
+                    <li>while (true)</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//左側を警備するなら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;if (patrollingleft)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//左に移動。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x--;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (x == 0)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;patrollingleft = true;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//右側を警備するなら。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;else</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//右に移動。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x++;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (x == 100)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;patrollingleft = false;</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ヴァルキリーの処理.....</font></li>
+                    <li>}</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  このコードを見ると、大変メンテナンスがしにくそうに感じます。
+                  ゲームに敵を追加しようとすると、このゲームループに変数や動作を命令するコードが増えていくことになります。
+                  <br>この問題を解決するために、UpdateMethodパターンを使用します。
+                  まず、<span class="strong-letter">各々のゲーム要素の基底クラスを定義</span>します。
+                  基底クラスにはUpdate関数という仮想関数を定義します。
+                  ゲームループからそのUpdate関数を呼び出すだけで、各々のゲーム要素の処理が実行されます。
+                  1フレームごとに全てのオブジェクトのUpdate関数を呼び出すので、<span class="strong-letter">全てのオブジェクトが足並みを揃える</span>ことができます。
+                  また、ゲームループがオブジェクトの集合体を保持することにより、<span class="strong-letter">オブジェクトの追加・削除が容易</span>になります。
                 </div>
             </div>
           </div>
+          <li id="2"><h2 class="margin-letter2">9.2 UpdateMethodパターン</h2></li>
+          <div class="letter">
+            <div>
+              では、UpdateMethodパターンについて見ていきましょう。
+              まずは、各々のゲーム要素の基底クラスであるEntityクラスを定義します。
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>class Entity</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Entity() {}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;virtual ~Entity(){}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ゲームループで呼び出される。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;virtual void Update() = 0;</li>
+                  <li>private:</li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                仮想関数Updateが宣言されているだけですが、実際は描画や物理シミュレーションなどの要素がくわわることでしょう。
+                重要なのは<span class="strong-letter">仮想関数Update</span>です。
+                <br>通常は、ゲーム本体によってこのEntityの集合を更新したり制御したりします。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//ゲーム世界を表すクラス。</font></li>
+                  <li>class World</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;World(){}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ゲームループ。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void GameLoop();</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Entityの集合。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;std::vector&lt;Entity&gt;     m_entityList;</li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                あとは、ゲームループでUpdate関数を呼び出すだけです。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li>void World::GameLoop()</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;while (true)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//ユーザーの入力処理。</font></li>
+                  <li></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (auto entity : m_entityList)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//各ゲーム要素の更新処理。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entity-&gt;Update();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//描画など。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                では、このEntityクラスを継承して骸骨兵士クラスを作りましょう。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//骸骨兵士。</font></li>
+                  <li>class SkeletonSoldier : public Entity</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;SkeletonSoldier(){}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;~SkeletonSoldier override(){}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//更新処理。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Update() override</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//左側を警備するなら。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (m_patrollingleft)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//左に移動。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_x--;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (m_x == 0)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_patrollingleft = true;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//右側を警備するなら。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//右に移動。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_x++;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (m_x == 100)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_patrollingleft = false;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//それぞれの変数はSkeletonSoldierフィールドに。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;bool m_patrollingleft = false;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;int m_x, m_y = 0;</li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                見て分かるように、前述したゲームループからコードの一部をUpdate関数に貼り付けただけです。
+                少し違うのが、<span class="strong-letter">m_patrollingleft変数をローカル変数からメンバ変数</span>にしたことです。
+                こうすることで、骸骨兵士それぞれにパラメータが保持させることができます。
+                <br>こうすることで、ゲーム世界に要素を追加することがずっと簡単になりました。
+                何故なら、各々のゲーム要素が必要なものを自分自身に保持しているからです。
+                <br>このパターンによって、「要素の追加」と「実装の追加」が分離されました。
+              </div>
+            </div>
+          </div>
+          <li id="3"><h2 class="margin-letter2">9.3 UpdateMethodパターン使用上の注意点</h2></li>
+          <div class="letter">
+            <div>
+              幾つかUpdateMethodパターンを使用する際の注意点を挙げましょう。
+              <ul>
+                <div class="margin-letter">
+                  <h5><li>再開のために前のフレームでの最終状態を保持する</li></h5>
+                  ゲームループから各々のコードを呼び出すような形にした場合、自分のコードから呼び出し元のコードに戻ってしまうと、
+                  自分の位置は失われてしまいます。
+                  なので、必要な情報はきちんと保持しておかなければなりません。
+                  前述の例ですと、m_patrollingleftなどがこれにあたります。
+                </div>
+                <div class="margin-letter">
+                  <h5><li>
+                    オブジェクトはフレーム単位で動くが、真の平行実行ではない
+                  </li></h5>
+                  このパターンでは、オブジェクトの処理を1つずつ実行していきます。
+                  各オブジェクトには、他のオブジェクトに影響を及ぼす処理がされているのが普通です。
+                  その結果、オブジェクトの処理順序が重要な意味を持つことになります。
+                </div>
+                <div class="margin-letter">
+                  <h5><li>更新中のリスト変更に注意</li></h5>
+                  更新中にオブジェクトをゲームに追加したり、削除したりといったコードが含まれていることがあります。
+                  <br>骸骨兵士が倒されると、アイテムを落とすようにしましょう。
+                  その場合、新しく追加されたアイテムが、追加されたのと同じフレーム内で更新されてしまうかもしれません。
+                  プレイヤーがまたそのアイテムを見てもいないのに、アイテムの状態が変わってしまうかもしれません。
+                </div>
+                <div class="margin-letter">
+                  <h5><li>パターンの適用条件</li></h5>
+                  UpdateMethodパターンが役に立つのは、次のような場合です。
+                  <ul>
+                    <li>同時に動くたくさんのオブジェクトやシステムがある。</li>
+                    <li>各々のオブジェクトは他のオブジェクトからほぼほぼ独立している。</li>
+                    <li>オブジェクトの動きはゲームの間中、続いている。</li>
+                  </ul>
+                </div>
+              </ul>
+            </div>
+          </div>
+          <li id="4"><h2 class="margin-letter2">9.4 練習問題1</h2></li>
+            <div class="letter">
+              <div>
+                practice/UpdateMethod/Practice1/Game.slnからVisualStudioを立ち上げてください。
+                実行すると、以下のようなゲームが起動します。
+                <div>
+                  <img src="image/8/1.png" class="margin-letter">
+                </div>
+                <div class="margin-letter">
+                  <span class="strong-letter">ValkyrieクラスとSkeletonSoldierクラスにEntityクラスを継承させて、
+                  UpdateMethodパターンを使用して更新処理を行うようにしてください。
+                  </span>
+                  <ul>
+                    <li>ValkyrieクラスとSkeletonSoldierにEntityクラスを継承させてください。</li>
+                    <li>WorldクラスにValkyrieクラスとSkeletonSoliderクラスのインスタンスをメンバ変数として保持させていますが、
+                      Entityクラスの配列を持たせるようにしてください。</li>
+                    <li>WorldクラスのUpdate関数で、配列のそれぞれの要素のUpdate関数を呼び出すようにしてください。</li>
+                    <li>Answerに実装例がありますので、参考にしてください。</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
         </ul>
       </div>
     </body>

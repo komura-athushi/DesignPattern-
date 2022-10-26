@@ -1,13 +1,14 @@
 #pragma once
+#include "Entity.h"
 
 class Valkyrie;
 
-class SkeletonSoldier
+class SkeletonSoldier : public Entity
 {
 public:
 	SkeletonSoldier() {}
-	~SkeletonSoldier(){}
-	void Update();
+	~SkeletonSoldier() override{}
+	void Update() override;
 	void SetTarget(Valkyrie* valkyrie)
 	{
 		m_valkyrie = valkyrie;
