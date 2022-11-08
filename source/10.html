@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>デザインパターン2 第十章</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/template.css">
+    <script src="../js/template.js"></script>
+  </head>
+
+    <body>
+      
+      <div id="box">
+      </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+      </script>
+      <script>
+        jQuery(function(){
+          $('#box').load('html/header.html') // #headerにheader.htmlを読み込む
+        });
+      </script>
+      <div class="title">
+        <h1>第十章 DataLocalityパターン</h1>
+      </div>
+      <div class="letter-body">
+        <ul id="list1">
+          <li id="1"><h2 class="margin-letter2">10.1 DataLocalityパターン誕生の背景</h2></li>
+          <div class="letter">
+            <div>
+                第十章では、DataLocality(データ局所化)について学びましょう。
+                簡単にいいますと、データをある限られた部分にまとめることです。
+                <div class="margin-letter">
+                    DataLocalityについて学ぶ前に、CPUについて少し解説しましょう。
+                    CPUは必要なデータをアクセスする際に、以下のような流れをとります。
+                </div>
+                <div>
+                    <img src="image/9/1.png" class="margin-letter">
+                </div>
+                <div class="margin-letter">
+                    さて、ここでCPUの進化の歴史について見ていきましょう。
+                    <br>CPUの処理の速さは年々進化を遂げています(限界を迎えつつありますが)。
+                    ですが、<span class="strong-letter">メインメモリへのアクセス速度はさほど向上していない</span>のです。
+                </div>
+                <div>
+                    <img src="image/9/2.png" class="margin-letter">
+                </div>
+                <div class="margin-letter">
+                    つまり、CPUではメインメモリへのアクセスをしている間、<span class="strong-letter">待ち時間が発生</span>している事になります(しかも結構な時間です)。
+                    この処理速度とメインメモリへのアクセス時間の差を無くすために存在しているのが、
+                    <span class="strong-letter">キャッシュメモリ</span>になります。
+                    <br>キャッシュメモリは、保持できるデータ量こそ少ないですが、<span class="strong-letter">アクセス速度がメインメモリに比べて圧倒的に速い</span>です。
+                    また、キャッシュメモリにアクセスして欲しいデータが存在することを<span class="strong-letter">キャッシュヒット</span>、存在しないことを<span class="strong-letter">キャッシュミス</span>
+                    キャッシュミスを減らしてキャッシュヒットを上げれば、メインメモリへのアクセス(時間が掛かる)を減らすことになりますので、
+                    必然的にプログラムの実行速度が上がります。
+                </div>
+                <div class="margin-letter">
+                    では、キャッシュミスを減らすには、どうすればいいでしょうか。
+                    <br>実は、メインメモリにアクセスした際に、
+                    <span class="strong-letter">欲しいデータだけでなくその周りのデータも読み込まれてキャッシュメモリに保存</span>されているのです。
+                    つまり、<span class="strong-letter">連なるデータは連続してメインメモリに保存する</span>ようにすればいいのです。
+                    こうすれば、キャッシュミスを減らすことができます。
+                    <br>これが<span class="strong-letter">DataLocality(データ局所化)</span>になります。
+                    <br><a href="https://zenn.dev/irugo/articles/4bd113195228c3#6.-%E3%82%AD%E3%83%A3%E3%83%83%E3%82%B7%E3%83%A5%E3%83%A1%E3%83%A2%E3%83%AA%E3%81%AE%E6%9C%89%E5%8A%B9%E5%88%A9%E7%94%A8">キャッシュメモリの有効利用</a>
+                    <br><a href="https://cocodrips.hateblo.jp/entry/2014/01/26/134501">キャッシュを無駄遣いするとどうなるか試してみた</a>
+                </div>
+                <div>
+                    <img src="image/9/4.png" class="margin-letter">
+                    <br><img src="image/9/3.png" class="margin-letter">
+                </div>
+            </div>
+          </div>
+          <li id="2"><h2 class="margin-letter2">10.2 DataLocalityパターン</h2></li>
+          <div class="letter">
+            <div>
+                では、実際のコードを交えてDataLocalityについて見ていきましょう。
+                <div class="margin-letter">
+                  以下のようなGameObjectクラスがあります。
+                  GameObjectは各Componentクラスの関数を呼び出すことで、更新処理や描画処理を実行します。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li>class GameObject</li>
+                    <li>{</li>
+                    <li>public:</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//更新処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;void Update()</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_ai-&gt;Update();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//物理処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;void UpdatePhysics()</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_physics-&gt;Update();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//描画処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;void Render()</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_render-&gt;Update();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>private:</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;AIComponent* m_ai = nullptr;            <font style="color:lightgreen;font-style:italic;">//AIの処理を行うクラス。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;PhysicsComponent* m_physics = nullptr;  <font style="color:lightgreen;font-style:italic;">//物理シミュレーション処理を行うクラス。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;GrahicsComponent* m_render = nullptr;   <font style="color:lightgreen;font-style:italic;">//描画処理を行うクラス。</font></li>
+                    <li>};</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  ゲームループでは、以下のようにGameObjectの処理を呼び出しています。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li><font style="color:lightgreen;font-style:italic;">//ゲームループ。</font></li>
+                    <li>while (true)</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//各ゲームオブジェクトの更新処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; gameObjectNumber; i++)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gameObjectList[i]-&gt;Update();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//各ゲームオブジェクトの物理処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; gameObjectNumber; i++)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gameObjectList[i]-&gt;UpdatePhysics();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//各ゲームオブジェクトの描画処理。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; gameObjectNumber; i++)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gameObjectList[i]-&gt;Render();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>}</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  この時、それぞれのクラスのインスタンスは下記のようにメモリに保持されています。
+                </div>
+                <div>
+                  <img src="image/9/5.png" class="margin-letter">
+                </div>
+                <div class="margin-letter">
+                  <span class="margin-letter">各インスタンスへのアクセスでポインタを介している</span>ので、キャッシュミスが発生してしまいます。
+                  また、それぞれのインスタンスが連続でメモリに保存されているという保障はありません。
+                  <br>そこで、ポインタを使用しないようにし、各インスタンスを確実に連続でメモリに保存させるようにします。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li><font style="color:lightgreen;font-style:italic;">//各ポインタは、各配列の先頭の要素を指している。</font></li>
+                    <li>AIComponent* m_aiComponents = new AIComponent[MAX_ENTITIES];</li>
+                    <li>PhysicsComponent* m_physicsComponents = new PhysicsComponent[MAX_ENTITIES];</li>
+                    <li>GraphicsComponent* m_graphicsComponents = new GraphicsComponent[MAX_ENTITIES];</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  そして、この配列を使用して、各Componentの関数を呼び出すようにします。
+                </div>
+                <div class="margin-letter">
+                  <code>
+                    <ol class="code-region row coll-11">
+                    <li><font style="color:lightgreen;font-style:italic;">//ゲームループ。</font></li>
+                    <li>while (true)</li>
+                    <li>{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//各Componentの処理を呼び出す。</font></li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; numEntities; i++)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_aiComponents[i].Update();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; numEntities; i++)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_physicsComponents[i].Update();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; numEntities; i++)</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_graphicsComponents[i].Render();</li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                    <li>}</li>
+                    </ol></code>
+                </div>
+                <div class="margin-letter">
+                  これで、ポインタの「追っかけ」は無くなりました。
+                  また、各配列のデータは連続してメモリに保存されています。
+                  <br><span class="strong-letter">キャッシュレスを減らす</span>ことが出来ました！
+                </div>
+                <div>
+                  <img src="image/9/6.png" class="margin-letter">
+                </div>
+            </div>
+          </div>
+          <li id="3"><h2 class="margin-letter2">10.3 練習問題1</h2></li>
+          <div class="letter">
+            <div>
+              practice/DataLocality/Practice1/Game.slnからVisualStudioを立ち上げてください。 
+              実行すると、以下のようなコンソールウィンドウが表示されます。
+              Practice1はint型の配列にそれぞれ値を入れて、その値の合計を表示するプログラムです。
+              <div>
+                <img src="image/9/7.png" class="margin-letter">
+              </div>
+              <div class="margin-letter">
+                <span class="strong-letter">キャッシュミスを減らして、プログラムの実行時間を速くしてください。</span>
+                <ul>
+                  <li><a href="https://cocodrips.hateblo.jp/entry/2014/01/26/134501">こちら</a>
+                  のサイトを参考にしてください。</li>
+                  <li>キャッシュミスを減らすと、大体実行時間が2～3分の1になると思います。</li>
+                  <li>Answerに実装例がありますので、参考にしてください。</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </ul>
+      </div>
+</body>
+</html>
