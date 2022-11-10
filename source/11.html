@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>デザインパターン2 第十一章</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/template.css">
+    <script src="../js/template.js"></script>
+  </head>
+
+    <body>
+      
+      <div id="box">
+      </div>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+      </script>
+      <script>
+        jQuery(function(){
+          $('#box').load('html/header.html') // #headerにheader.htmlを読み込む
+        });
+      </script>
+      <div class="title">
+        <h1>第十一章 ObjectPoolパターン</h1>
+      </div>
+      <div class="letter-body">
+        <ul id="list1">
+          <li id="1"><h2 class="margin-letter2">11.1 ObjectPoolパターン誕生の背景</h2></li>
+          <div class="letter">
+            <div>
+                メモリの解放や確保を動的に行うと起こる問題が、<span class="strong-letter">フラグメンテーション</span>です。
+                <br><a href="https://www.itpassportsiken.com/word/%E3%83%95%E3%83%A9%E3%82%B0%E3%83%A1%E3%83%B3%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3.html#:~:text=%E3%83%95%E3%83%A9%E3%82%B0%E3%83%A1%E3%83%B3%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%EF%BC%88fragmentation%EF%BC%89%E3%80%81%E6%96%AD%E7%89%87%E5%8C%96,%E3%81%A7%E3%81%8D%E3%81%AA%E3%81%8F%E3%81%AA%E3%82%8B%E7%8A%B6%E6%85%8B%E3%82%92%E8%A8%80%E3%81%86%E3%80%82">フラグメンテーションとは</a>
+                <div>
+                  <img src="image/10/1.png" class="margin-letter">
+                </div>
+                <div class="margin-letter">
+                  フラグメンテーションが起きる確率が低くても、積もり積もれば使用可能領域が少なくなり、最終的にはゲームが動かなくなるかもしれません。
+                </div>
+                <div class="margin-letter">
+                  フラグメンテーションを避けなければならない上に、メモリ確保・解放が低速である可能性があるので、
+                  <span class="strong-letter">メモリ使用には配慮</span>する必要があります。
+                  <br>一番簡単な解決策としては、ゲームを開始する際に大きくメモリを確保してその領域を使用することです。
+                  ですがこの方法だと、ゲーム中にオブジェクトを生成・破壊したい時に問題が生じるでしょう。
+                  <br>Object Poolはこの両方の問題を解決できるパターンになります。
+                </div>
+            </div>
+          </div>
+          <li id="2"><h2 class="margin-letter2">11.2 ObjectPoolパターン</h2></li>
+          <div class="letter">
+            <div>
+              では、実際のコードを見ていきましょう。
+              ゲームのパーティクルシステムで使用されるParticleクラスです。
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11"
+                  <li><font style="color:lightgreen;font-style:italic;">//パーティクルシステムのクラス。</font></li>
+                  <li>class Particle</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Particle():m_inUse(false){}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Init関数が呼び出されると使用しているフラグをtrueに。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Init()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//....</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_inUse = true;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;bool GetInUse()</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return m_inUse;</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//更新処理。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Update();</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_inUse = false;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//使用中ならtrue。</font></li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                Particleクラスを保持するParticlePoolクラスでは、<span class="strong-letter">Particleクラスの固定長配列を保持</span>させるようにします。
+                Particleクラスを使用する際は、このParticlePoolクラスを介するようにします。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol class="code-region row coll-11">
+                  <li><font style="color:lightgreen;font-style:italic;">//ParticleをPool(一時的に貯めておく)クラス。</font></li>
+                  <li>class ParticlePool</li>
+                  <li>{</li>
+                  <li>public:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//パーティクルを生成。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void CreateParticle();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//パーティクルを更新。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;void Update();</li>
+                  <li>private:</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;static const int&nbsp;&nbsp;&nbsp;&nbsp;POOL_SIZE = 100;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//使用できるParticleの数。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;Particle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_particles[POOL_SIZE];&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Particleのインスタンス。</font></li>
+                  <li>};</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                CreateParticle関数では、Particleの配列から使用可能なParticleインスタンスを探し出しInit関数を呼び出します。
+                Update関数では、使用中のParticleインスタンスの更新処理を呼び出します。
+              </div>
+              <div class="margin-letter">
+                <code>
+                  <ol style="list-style:decimal-leading-zero outside;in-left:0;padding-left:36px;margin:0;background-color:#000;color:#FFF;">
+                  <li><font style="color:lightgreen;font-style:italic;">//パーティクルを生成。</font></li>
+                  <li>void ParticlePool::CreateParticle()</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; POOL_SIZE;i++)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//使用中でなければ。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!m_particles[i].GetInUse())</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//Init関数を呼び出す。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_particles[i].Init();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>}</li>
+                  <li></li>
+                  <li><font style="color:lightgreen;font-style:italic;">//パーティクルを更新。</font></li>
+                  <li>void ParticlePool::Update()</li>
+                  <li>{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;for (int i = 0; i &lt; POOL_SIZE; i++)</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//使用中でなければ。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!m_particles[i].GetInUse())</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="color:lightgreen;font-style:italic;">//更新。</font></li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_particles[i].Update();</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>&nbsp;&nbsp;&nbsp;&nbsp;}</li>
+                  <li>}</li>
+                  </ol></code>
+              </div>
+              <div class="margin-letter">
+                この実装では、新しくParticleのインスタンスを生成する必要はありません。
+                また、Particleの生成・消失にも対応しています。
+                <br>さらに、同じ型のオブジェクトをメモリに連続して割り当てることで、キャッシュヒット率を挙げることができます。
+              </div>
+            </div>
+          </div>
+          <li id="3"><h2 class="margin-letter2">11.3 ObjectPoolパターン使用上の注意</h2></li>
+          <div class="letter">
+            <div>
+              <ul>
+                <div class="margin-letter">
+                  <h5><li>不要なオブジェクトにメモリが割り当てられる可能性がある</li></h5>
+                  プールのサイズが小さすぎず、大きすぎないように調整する必要があります。
+                  小さすぎるとゲームがクラッシュするかもしれませんし、大きすぎると使用可能なメモリが少なくなってしまいます。
+                </div>
+                <div class="margin-letter">
+                  <h5><li>一時的に使用可能なオブジェクトの数が固定される</li></h5>
+                  フラグメンテーションが起こることを考えると、これはある意味いいことです。
+                  ですが、Poolからオブジェクトをもらおうとしたら全て使用中で使えないということが起こりかねません。
+                </div>
+                <div class="margin-letter">
+                  <h5><li>再使用されるオブジェクトは自動的に初期化されるわけではない</li></h5>
+                  ObjectPoolパターンの場合、オブジェクトを再使用しています。
+                  そのオブジェクトは前に使われたものなのです。
+                  ですので、初期化するコードがオブジェクトをくまなく初期化するように十分注意する必要があります。
+                </div>
+                <div class="margin-letter">
+                  <h5><li>使用されていないオブジェクトがメモリに残る</li></h5>
+                  ObjectPoolパターンでは、使用されてないオブジェクトであってもメモリの解放を行うことはありあません。
+                  もし、使用されていないオブジェクトがガベージコレクションを使用した他オブジェクトの参照を保持していたら、
+                  その他オブジェクトはメモリ解放が行われなくなってしまいます。
+                  <br>このような自体を避ける為に、オブジェクトが使用されなくなった時には、他オブジェクトへの参照をクリアするようにしましょう。
+                </div>
+                <div class="margin-letter">
+                  <h5><li>パターンの適用条件</li></h5>
+                  このパターンはゲームでは広く用いられています。
+                  例としては、ゲーム要素は視覚効果といったものやサウンドといったものなどの目に見えない要素などです。
+                  <ul>
+                    <li>オブジェクトの生成と破壊が頻繁に起きる場合</li>
+                    <li>各オブジェクトのサイズが似ている場合</li>
+                    <li>オブジェクトのメモリをヒープに割り当てる場合や、フラグメンテーションが発生する場合</li>
+                  </ul>
+                </div>
+              </ul>
+            </div>
+          </div>
+        </ul>
+      </div>
+    </body>
+</html>
